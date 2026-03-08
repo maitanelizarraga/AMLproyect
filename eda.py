@@ -26,6 +26,7 @@ def eda(df):
     import matplotlib.pyplot as plt 
     import seaborn as sns 
 
+
     # Fraud distribution
     ax = sns.countplot(x="fraud_label", data=df)
     plt.title("Fraud distribution")
@@ -119,7 +120,7 @@ def eda(df):
 
     # Count of payment types
     sns.countplot(x="payment_mode", data=df)
-    plt.title("Frauds by payment method")
+    plt.title("Payment method")
     plt.xlabel("Payment method")
     plt.ylabel("Number of frauds")
     plt.xticks(rotation=45)
@@ -132,14 +133,22 @@ def eda(df):
     plt.xticks(rotation=45)
     plt.show()
 
-    # Hours and quantities transactions
-    sns.scatterplot(x="transaction_hour", y="transaction_amount", data=df)
-    plt.title("Hour vs quantity transactions")
-    plt.show()
 
-    # Hours and quantities transactions
-    sns.scatterplot(x="transaction_hour", y="transaction_amount", data=df[df["fraud_label"] == 1])
-    plt.title("FRAUDULENT Hour vs quantity transactions")
+    # Hours 
+    fraud_df = df[df["fraud_label"] == 1]
+
+    ax = sns.countplot(x="transaction_hour", data=fraud_df)
+    plt.title("Fraud count by hour")
+
+    for p in ax.patches:
+        ax.annotate(
+            str(p.get_height()),
+            (p.get_x() + p.get_width() / 2., p.get_height()),
+            ha='center', va='center',
+            xytext=(0, 10),
+            textcoords='offset points'
+        )
+
     plt.show()
 
 
