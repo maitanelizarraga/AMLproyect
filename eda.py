@@ -26,7 +26,7 @@ def eda(df):
     import matplotlib.pyplot as plt 
     import seaborn as sns 
 
-    # 1. Fraud distribution
+    # Fraud distribution
     ax = sns.countplot(x="fraud_label", data=df)
     plt.title("Fraud distribution")
 
@@ -41,7 +41,8 @@ def eda(df):
 
     plt.show()
 
-    # 2. Device type distribution
+
+    # Device type distribution
     ax = sns.countplot(x="device_type", data=df)
     plt.title("Device type distribution")
 
@@ -56,7 +57,52 @@ def eda(df):
 
     plt.show()
 
-    # 3. Previous failed attempts distribution
+    ax = sns.countplot(x="device_type", data=df[df["fraud_label"] == 1])
+    plt.title("FRAUDULENT Device type distribution")
+
+    for p in ax.patches:
+        ax.annotate(
+            str(p.get_height()),
+            (p.get_x() + p.get_width() / 2., p.get_height()),
+            ha='center', va='center',
+            xytext=(0, 10),
+            textcoords='offset points'
+        )
+
+    plt.show()
+
+    
+
+    # Location distribution
+    ax = sns.countplot(x="device_location", data=df)
+    plt.title("Device location distribution")
+
+    for p in ax.patches:
+        ax.annotate(
+            str(p.get_height()),
+            (p.get_x() + p.get_width() / 2., p.get_height()),
+            ha='center', va='center',
+            xytext=(0, 10),
+            textcoords='offset points'
+        )
+
+    plt.show()
+
+    ax = sns.countplot(x="device_location", data=df[df["fraud_label"] == 1])
+    plt.title("FRAUDULENT Device location distribution")
+
+    for p in ax.patches:
+        ax.annotate(
+            str(p.get_height()),
+            (p.get_x() + p.get_width() / 2., p.get_height()),
+            ha='center', va='center',
+            xytext=(0, 10),
+            textcoords='offset points'
+        )
+
+    plt.show()
+
+    # Previous failed attempts distribution
     ax = sns.countplot(x="previous_failed_attempts", data=df)
     plt.title("Previous failed attempts distribution")
 
@@ -71,29 +117,38 @@ def eda(df):
 
     plt.show()
 
-    # 3. Count of payment types
-    sns.countplot(y="payment_mode", data=df)
-    plt.title("Payment methods")
-    plt.show()
-
-    # 4. Hours and quantities transactions
-    sns.scatterplot(x="transaction_hour", y="transaction_amount", data=df)
-    plt.title("Hour vs quantity transactions")
-    plt.show()
-
-    # 5. Heatmap with numerical variables
-    numeric_df = df.select_dtypes(include=["int64", "float64"])
-    sns.heatmap(numeric_df.corr(), annot=True, cmap="coolwarm")
-    plt.title("Correlations")
-    plt.show()
-    
-    # 6. Frauds by payment method
-    sns.countplot(x="payment_mode", data=df[df["fraud_label"] == 1])
+    # Count of payment types
+    sns.countplot(x="payment_mode", data=df)
     plt.title("Frauds by payment method")
     plt.xlabel("Payment method")
     plt.ylabel("Number of frauds")
     plt.xticks(rotation=45)
     plt.show()
+
+    sns.countplot(x="payment_mode", data=df[df["fraud_label"] == 1])
+    plt.title("Frauds by payment method")
+    plt.xlabel("FRAUDULENT Payment method")
+    plt.ylabel("Number of frauds")
+    plt.xticks(rotation=45)
+    plt.show()
+
+    # Hours and quantities transactions
+    sns.scatterplot(x="transaction_hour", y="transaction_amount", data=df)
+    plt.title("Hour vs quantity transactions")
+    plt.show()
+
+    # Hours and quantities transactions
+    sns.scatterplot(x="transaction_hour", y="transaction_amount", data=df[df["fraud_label"] == 1])
+    plt.title("FRAUDULENT Hour vs quantity transactions")
+    plt.show()
+
+
+    # Heatmap with numerical variables
+    numeric_df = df.select_dtypes(include=["int64", "float64"])
+    sns.heatmap(numeric_df.corr(), annot=True, cmap="coolwarm")
+    plt.title("Correlations")
+    plt.show()
+        
 
 
 
