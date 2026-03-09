@@ -28,7 +28,7 @@ def eda(df):
 
 
     # Fraud distribution
-    ax = sns.countplot(x="fraud_label", data=df)
+    ax = sns.countplot(x="fraud_label", data=df, color="#D2B48C")
     plt.title("Fraud distribution")
 
     for p in ax.patches:
@@ -58,7 +58,7 @@ def eda(df):
 
     plt.show()
 
-    ax = sns.countplot(x="device_type", data=df[df["fraud_label"] == 1])
+    ax = sns.countplot(x="device_type", data=df[df["fraud_label"] == 1], color="#ff6666")
     plt.title("FRAUDULENT Device type distribution")
 
     for p in ax.patches:
@@ -89,7 +89,7 @@ def eda(df):
 
     plt.show()
 
-    ax = sns.countplot(x="device_location", data=df[df["fraud_label"] == 1])
+    ax = sns.countplot(x="device_location", data=df[df["fraud_label"] == 1], color="#ff6666")
     plt.title("FRAUDULENT Device location distribution")
 
     for p in ax.patches:
@@ -104,7 +104,7 @@ def eda(df):
     plt.show()
 
     # Previous failed attempts distribution
-    ax = sns.countplot(x="previous_failed_attempts", data=df)
+    ax = sns.countplot(x="previous_failed_attempts", data=df, color="#D2B48C")
     plt.title("Previous failed attempts distribution")
 
     for p in ax.patches:
@@ -122,11 +122,11 @@ def eda(df):
     sns.countplot(x="payment_mode", data=df)
     plt.title("Payment method")
     plt.xlabel("Payment method")
-    plt.ylabel("Number of frauds")
+    plt.ylabel("Number of transactions")
     plt.xticks(rotation=45)
     plt.show()
 
-    sns.countplot(x="payment_mode", data=df[df["fraud_label"] == 1])
+    sns.countplot(x="payment_mode", data=df[df["fraud_label"] == 1], color="#ff6666")
     plt.title("Frauds by payment method")
     plt.xlabel("FRAUDULENT Payment method")
     plt.ylabel("Number of frauds")
@@ -134,10 +134,8 @@ def eda(df):
     plt.show()
 
 
-    # Hours 
-    fraud_df = df[df["fraud_label"] == 1]
-
-    ax = sns.countplot(x="transaction_hour", data=fraud_df)
+    # Hours of the fraud distribution
+    ax = sns.countplot(x="transaction_hour", data=df[df["fraud_label"] == 1], color="#ff6666")
     plt.title("Fraud count by hour")
 
     for p in ax.patches:
