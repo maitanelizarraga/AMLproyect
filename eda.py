@@ -44,64 +44,42 @@ def eda(df):
 
 
     # Device type distribution
-    ax = sns.countplot(x="device_type", data=df)
-    plt.title("Device type distribution")
+    # Count combinations
+    counts = df.groupby(["device_type", "fraud_label"]).size().unstack(fill_value=0)
 
-    for p in ax.patches:
-        ax.annotate(
-            str(p.get_height()),
-            (p.get_x() + p.get_width() / 2., p.get_height()),
-            ha='center', va='center',
-            xytext=(0, 10),
-            textcoords='offset points'
-        )
+    # Plot stacked bar chart
+    ax = counts.plot(kind="bar", stacked=True, color=["#3274a1", "#ff6666"])
 
-    plt.show()
+    plt.title("Device type distribution (Fraud vs Non-Fraud)")
+    plt.xlabel("Device type")
+    plt.ylabel("Number of transactions")
+    plt.legend(["Non-Fraud", "Fraud"])
 
-    ax = sns.countplot(x="device_type", data=df[df["fraud_label"] == 1], color="#ff6666")
-    plt.title("FRAUDULENT Device type distribution")
-
-    for p in ax.patches:
-        ax.annotate(
-            str(p.get_height()),
-            (p.get_x() + p.get_width() / 2., p.get_height()),
-            ha='center', va='center',
-            xytext=(0, 10),
-            textcoords='offset points'
-        )
+    # Add labels
+    for container in ax.containers:
+        ax.bar_label(container)
 
     plt.show()
 
     
 
-    # Location distribution
-    ax = sns.countplot(x="device_location", data=df)
-    plt.title("Device location distribution")
+    # Location distribution (stacked fraud vs non-fraud)
+    counts = df.groupby(["device_location", "fraud_label"]).size().unstack(fill_value=0)
 
-    for p in ax.patches:
-        ax.annotate(
-            str(p.get_height()),
-            (p.get_x() + p.get_width() / 2., p.get_height()),
-            ha='center', va='center',
-            xytext=(0, 10),
-            textcoords='offset points'
-        )
+    ax = counts.plot(kind="bar", stacked=True, color=["#3274a1", "#ff6666"])
 
-    plt.show()
+    plt.title("Device location distribution (Fraud vs Non-Fraud)")
+    plt.xlabel("Device location")
+    plt.ylabel("Number of transactions")
+    plt.xticks(rotation=45)
+    plt.legend(["Non-Fraud", "Fraud"])
 
-    ax = sns.countplot(x="device_location", data=df[df["fraud_label"] == 1], color="#ff6666")
-    plt.title("FRAUDULENT Device location distribution")
-
-    for p in ax.patches:
-        ax.annotate(
-            str(p.get_height()),
-            (p.get_x() + p.get_width() / 2., p.get_height()),
-            ha='center', va='center',
-            xytext=(0, 10),
-            textcoords='offset points'
-        )
+    # Add value labels
+    for container in ax.containers:
+        ax.bar_label(container)
 
     plt.show()
+
 
     # Previous failed attempts distribution
     ax = sns.countplot(x="previous_failed_attempts", data=df, color="#D2B48C")
@@ -118,19 +96,22 @@ def eda(df):
 
     plt.show()
 
-    # Count of payment types
-    sns.countplot(x="payment_mode", data=df)
-    plt.title("Payment method")
+
+    # Payment method distribution (Fraud vs Non-Fraud)
+    counts = df.groupby(["payment_mode", "fraud_label"]).size().unstack(fill_value=0)
+
+    ax = counts.plot(kind="bar", stacked=True, color=["#3274a1", "#ff6666"])
+
+    plt.title("Payment method distribution (Fraud vs Non-Fraud)")
     plt.xlabel("Payment method")
     plt.ylabel("Number of transactions")
     plt.xticks(rotation=45)
-    plt.show()
+    plt.legend(["Non-Fraud", "Fraud"])
 
-    sns.countplot(x="payment_mode", data=df[df["fraud_label"] == 1], color="#ff6666")
-    plt.title("Frauds by payment method")
-    plt.xlabel("FRAUDULENT Payment method")
-    plt.ylabel("Number of frauds")
-    plt.xticks(rotation=45)
+    # Add value labels
+    for container in ax.containers:
+        ax.bar_label(container)
+
     plt.show()
 
 
