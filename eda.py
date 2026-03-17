@@ -3,6 +3,9 @@
 def importarcsv(): 
     import pandas as pd 
     df = pd.read_csv("Digital_Payment_Fraud_Detection_Dataset.csv") 
+    #we make sure that the dataset is correctly imported 
+    #we can see the different columns names 
+    print(df.iloc[0]) 
     return df
 
 def initialinspection(df): 
@@ -19,7 +22,7 @@ def initialinspection(df):
     print(" ")
 
 def datacleaning(df): 
-    #
+    #as we have seen, there are not missing values so the cleaning is not needed
     return df
 
 def eda(df): 
@@ -140,11 +143,32 @@ def eda(df):
 
 
 
-def main():
-    df = importarcsv() 
-    initialinspection(df)
-    df = datacleaning(df)
-    eda(df)
+
+def datapartitioning(df):
+    import pandas as pd
+    import numpy as np
     
-if __name__ == "__main__": 
-    main()
+    # Fijar la semilla para reproducibilidad
+    np.random.seed(42)
+    
+    # Separar las características y la variable objetivo
+    X = df.drop("fraud_label", axis=1)
+    y = df["fraud_label"]
+    
+    # Crear índices aleatorios
+    indices = np.random.permutation(len(df))
+    
+    # Calcular el tamaño del test (20%)
+    test_size = int(len(df) * 0.2)
+    
+    # Separar índices para train y test
+    test_indices = indices[:test_size]
+    train_indices = indices[test_size:]
+    
+    # Crear los conjuntos de entrenamiento y prueba
+    X_train = X.iloc[train_indices]
+    X_test = X.iloc[test_indices]
+    y_train = y.iloc[train_indices]
+    y_test = y.iloc[test_indices]
+    
+    return X_train, X_test, y_train, y_test
