@@ -84,6 +84,19 @@ def eda(df):
     plt.show()
 
 
+    #HEATMAP: Locations vs payment methods(Only fraud)
+    fraud_df = df[df['fraud_label'] == 1]
+    pivot_fraud = fraud_df.pivot_table(index='device_location', 
+                                    columns='payment_mode', 
+                                    values='transaction_id', 
+                                    aggfunc='count').fillna(0)
+
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(pivot_fraud, annot=True, fmt='g', cmap='YlOrRd')
+    plt.title('Concentration of fraud: Location vs Payment methods')
+    plt.show()
+
+
     # Previous failed attempts distribution
     ax = sns.countplot(x="previous_failed_attempts", data=df, color="#D2B48C")
     plt.title("Previous failed attempts distribution")
@@ -133,17 +146,19 @@ def eda(df):
 
     plt.show()
 
-
-    # Heatmap with numerical variables
+    # Correlation with numerical variables
     numeric_df = df.select_dtypes(include=["int64", "float64"])
     sns.heatmap(numeric_df.corr(), annot=True, cmap="coolwarm")
     plt.title("Correlations")
     plt.show()
-        
 
+    #Boxplot
+    plt.figure(figsize=(8, 6))
+    sns.boxplot(x='fraud_label', y='transaction_amount', data=df, palette='viridis')
+    plt.title('Distribution of Amounts: Legitimate (0) vs Fraudulent (1)')
+    plt.show()
 
-
-
+ 
 def datapartitioning(df):
     import pandas as pd
     import numpy as np
