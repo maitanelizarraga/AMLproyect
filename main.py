@@ -1,25 +1,23 @@
 from eda import importarcsv, datapartitioning, initialinspection, datacleaning, eda 
 
 def main():
-    # Primero importamos los datos
+    # We import the dataset using the function we created in eda.py
     df = importarcsv()
     
-    # Luego hacemos la inspección inicial
+    # We perform the initial inspection
     initialinspection(df)
     
-    # Limpiamos los datos
+    # We clean the data
     df = datacleaning(df)
     
-    # Hacemos el análisis exploratorio
+    # We perform exploratory data analysis
     eda(df)
     
-    # Finalmente particionamos los datos
+    # We partition the data
     X_train, X_test, y_train, y_test = datapartitioning(df)
     
-    # Aquí puedes continuar con el resto de tu código
-    print("Datos preparados correctamente")
-    print(f"Tamaño del entrenamiento: {X_train.shape}")
-    print(f"Tamaño del test: {X_test.shape}")
+    print(f"Training set size: {X_train.shape}")
+    print(f"Test set size: {X_test.shape}")
 
 if __name__ == "__main__": 
     main()
