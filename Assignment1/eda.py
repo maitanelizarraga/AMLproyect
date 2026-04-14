@@ -2,15 +2,9 @@
 
 def importarcsv(): 
     import pandas as pd 
-<<<<<<< HEAD:Assignment1/eda.py
-    df = pd.read_csv("Assignment1/Digital_Payment_Fraud_Detection_Dataset.csv") 
+    df = pd.read_csv("Digital_Payment_Fraud_Detection_Dataset.csv") 
     #we make sure that the dataset is correctly imported 
     #we can see the different columns names 
-=======
-    df = pd.read_csv("Digital_Payment_Fraud_Detection_Dataset.csv") 
-    # We make sure that the dataset is correctly imported 
-    # We can see the different columns names 
->>>>>>> ca8bfb11237163a087c426ff81b443647914bc50:eda.py
     print(df.iloc[0]) 
     return df
 

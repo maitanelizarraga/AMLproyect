@@ -12,7 +12,7 @@ def main():
     df = datacleaning(df)
     
     # Hacemos el análisis exploratorio (opcional)
-    # eda(df)
+    #eda(df)
     
     # Particionamos los datos
     X_train, X_test, y_train, y_test = datapartitioning(df)
