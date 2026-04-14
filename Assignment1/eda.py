@@ -2,9 +2,15 @@
 
 def importarcsv(): 
     import pandas as pd 
+<<<<<<< HEAD:Assignment1/eda.py
     df = pd.read_csv("Assignment1/Digital_Payment_Fraud_Detection_Dataset.csv") 
     #we make sure that the dataset is correctly imported 
     #we can see the different columns names 
+=======
+    df = pd.read_csv("Digital_Payment_Fraud_Detection_Dataset.csv") 
+    # We make sure that the dataset is correctly imported 
+    # We can see the different columns names 
+>>>>>>> ca8bfb11237163a087c426ff81b443647914bc50:eda.py
     print(df.iloc[0]) 
     return df
 
@@ -22,7 +28,7 @@ def initialinspection(df):
     print(" ")
 
 def datacleaning(df): 
-    #as we have seen, there are not missing values so the cleaning is not needed
+    # As we have seen, there are not missing values so the cleaning is not needed
     return df
 
 def eda(df): 
@@ -152,7 +158,7 @@ def eda(df):
     plt.title("Correlations")
     plt.show()
 
-    #Boxplot
+    # Boxplot
     plt.figure(figsize=(8, 6))
     sns.boxplot(x='fraud_label', y='transaction_amount', data=df, palette='viridis')
     plt.title('Distribution of Amounts: Legitimate (0) vs Fraudulent (1)')
@@ -163,24 +169,24 @@ def datapartitioning(df):
     import pandas as pd
     import numpy as np
     
-    # Fijar la semilla para reproducibilidad
+    # Fix the seed for reproducibility
     np.random.seed(42)
     
-    # Separar las características y la variable objetivo
+    # Separate features and target variable
     X = df.drop("fraud_label", axis=1)
     y = df["fraud_label"]
     
-    # Crear índices aleatorios
+    # We create a random permutation of the indices of the dataset
     indices = np.random.permutation(len(df))
     
-    # Calcular el tamaño del test (20%)
+    # We store the size of the test set (20% of the dataset)
     test_size = int(len(df) * 0.2)
     
-    # Separar índices para train y test
+    # We separate the indices for the test and training sets
     test_indices = indices[:test_size]
     train_indices = indices[test_size:]
     
-    # Crear los conjuntos de entrenamiento y prueba
+    # Create the training and test sets
     X_train = X.iloc[train_indices]
     X_test = X.iloc[test_indices]
     y_train = y.iloc[train_indices]
