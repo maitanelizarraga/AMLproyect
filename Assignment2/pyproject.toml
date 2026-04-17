@@ -5,7 +5,11 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "matplotlib>=3.10.8",
     "optuna-dashboard>=0.20.0",
+    "pandas>=3.0.2",
+    "seaborn>=0.13.2",
+    "statsmodels>=0.14.6",
     "tensorboard>=2.20.0",
     "torch>=2.11.0",
     "torchaudio>=2.11.0",

@@ -1,7 +1,11 @@
 # EXPLORATORY DATA ANALYSIS
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from statsmodels.tsa.seasonal import seasonal_decompose
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 
 def importarcsv(): 
-    import pandas as pd 
     df = pd.read_csv("retail_store_inventory.csv") 
     #we make sure that the dataset is correctly imported 
     #we can see the different columns names 
@@ -22,20 +26,16 @@ def initialinspection(df):
     print(" ")
 
 def datacleaning(df): 
-    import pandas as pd
     #as we have seen, it do not recognice the date, so we convert it and make sure its correct
     df['Date'] = pd.to_datetime(df['Date'])
     print("Data types:" + "\n" + str(df.dtypes)) 
     print(" ")
-
-    #as we have seen, there are not missing values so more cleaning is not needed
+    #There are not missing values so more cleaning is not needed
     return df
 
 
 def eda(df): 
-    import matplotlib.pyplot as plt 
-    import seaborn as sns 
-    
+
     print("OUTLIERS ANALYSIS")
     sns.set_theme(style="whitegrid")
     numeric_cols = df.select_dtypes(include=['number']).columns
@@ -49,7 +49,6 @@ def eda(df):
     plt.tight_layout()
     plt.show()
     print("/n")
-
 
     print("VISUALIZATION OF THE DATA")
     # --- 1. MATRIZ DE CORRELACIÓN ---
@@ -103,12 +102,50 @@ def eda(df):
     plt.xticks(rotation=45)
     plt.show()
 
+
+###############Time Plots ####################
+
+    # Agregamos por día para ver la tendencia general
+    df_daily = df.groupby('Date')['Units Sold'].sum().asfreq('D').fillna(0)
+
+    # --- 1. DESCOMPOSICIÓN ESTACIONAL ---
+    # Usamos un modelo aditivo (puedes probar 'multiplicative' si la varianza aumenta con el tiempo)
+    # El periodo depende de tus datos (7 para semanal, 30 para mensual)
+    decomposition = seasonal_decompose(df_daily, model='additive', period=30)
+    
+    fig = decomposition.plot()
+    fig.set_size_inches(12, 8)
+    fig.suptitle('Descomposición Estacional: Tendencia, Estacionalidad y Residuos', fontsize=16)
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+    plt.show()
     
 
-        
+    # --- 2. AUTOCORRELACIÓN (ACF y PACF) ---
+    # Vital para elegir los términos p y q de ARIMA
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 5))
+    plot_acf(df_daily, ax=ax1, lags=30, title="Autocorrelación (ACF)")
+    plot_pacf(df_daily, ax=ax2, lags=30, title="Autocorrelación Parcial (PACF)")
+    plt.show()
 
+    # --- 3. ANÁLISIS DE ESTACIONARIEDAD (Rolling Statistics) ---
+    rolmean = df_daily.rolling(window=7).mean()
+    rolstd = df_daily.rolling(window=7).std()
 
+    plt.figure(figsize=(12, 6))
+    plt.plot(df_daily, color='blue', label='Original', alpha=0.3)
+    plt.plot(rolmean, color='red', label='Media Móvil (7d)')
+    plt.plot(rolstd, color='black', label='Desviación Típica Móvil (7d)')
+    plt.legend(loc='best')
+    plt.title('Media y Desviación Estándar Móvil')
+    plt.show()
 
+    # --- 4. IMPACTO DE VARIABLES EXÓGENAS (Boxplot Promociones) ---
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(data=df, x='Holiday/Promotion', y='Units Sold', palette='Set2')
+    plt.title('Impacto de Promociones en las Unidades Vendidas')
+    plt.xticks([0, 1], ['Sin Promo', 'Con Promo'])
+    plt.show()
+       
 
 def datapartitioning(df):
     
