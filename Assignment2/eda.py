@@ -51,99 +51,96 @@ def eda(df):
     print("/n")
 
     print("VISUALIZATION OF THE DATA")
-    # --- 1. MATRIZ DE CORRELACIÓN ---
-    # Para ver qué variables influyen más en las "Units Sold"
+    # CORRELATION MATRIX 
+    # To see wich variable affects more tu the units sold column
     plt.figure(figsize=(10, 8))
     numeric_df = df.select_dtypes(include=['number'])
     correlation = numeric_df.corr()
     sns.heatmap(correlation, annot=True, cmap='coolwarm', fmt=".2f")
-    plt.title('Correlación entre Variables Numéricas')
+    plt.title('Numerical variables correlation')
     plt.show()
 
-    # --- 2. SERIES TEMPORALES POR SEPARADO (FACET GRID) ---
-    # 1. Agrupamos los datos
+    # TEMPORAL SERIES
+    # we group the data
     df_cat_temp = df.groupby(['Date', 'Category'])['Units Sold'].sum().reset_index()
 
-    # 2. Creamos la cuadrícula (una columna por cada categoría)
-    # 'col_wrap=3' hará que se muestren 3 gráficas por fila
+    # we make the grid
+    # 'col_wrap=3' makes three plots per row
     g = sns.FacetGrid(df_cat_temp, col="Category", hue="Category", 
                       col_wrap=3, height=4, aspect=1.5)
 
-    # 3. Dibujamos las líneas en cada cuadro
+    # make lines for each plot
     g.map(sns.lineplot, "Date", "Units Sold")
 
-    # 4. Ajustes estéticos
+    # stetical adjustments
     g.set_axis_labels("Fecha", "Unidades Vendidas")
-    g.set_titles("{col_name}") # Pone el nombre de la categoría como título de cada cuadro
+    g.set_titles("{col_name}") #name of category as title
     
-    # Rotamos las fechas de cada gráfica para que se lean bien
+    # we rotate the date for reading it better
     for ax in g.axes.flat:
         for label in ax.get_xticklabels():
             label.set_rotation(45)
 
     plt.subplots_adjust(top=0.9)
-    g.fig.suptitle('Tendencia de Ventas por Categoría (Vista Individual)', fontsize=16)
+    g.fig.suptitle('Tendencies of sales per category', fontsize=16)
     
     plt.show()
 
-    # --- 3. VENTAS POR CATEGORÍA Y TEMPORADA ---
-    # Útil para entender qué productos se mueven más según el clima/estación
+    # SALES BY SEASON AND CATEGORY 
     plt.figure(figsize=(12, 6))
     sns.barplot(data=df, x='Category', y='Units Sold', hue='Seasonality', palette='viridis')
-    plt.title('Ventas Promedio por Categoría y Estación')
+    plt.title('Average Sales by Category and Season')
     plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
     plt.show()
 
-    # --- 4. VENTAS POR REGIÓN ---
-    # Para identificar si hay regiones con mejor desempeño
+    # SALES BY REGION
     plt.figure(figsize=(12, 6))
     sns.barplot(data=df, x='Region', y='Units Sold', palette='viridis')
-    plt.title('Ventas Promedio por Región')
+    plt.title('Average Sales by Region')
     plt.xticks(rotation=45)
     plt.show()
 
 
 ###############Time Plots ####################
 
-    # Agregamos por día para ver la tendencia general
+    # we group by date to see the general tendencies
     df_daily = df.groupby('Date')['Units Sold'].sum().asfreq('D').fillna(0)
 
-    # --- 1. DESCOMPOSICIÓN ESTACIONAL ---
-    # Usamos un modelo aditivo (puedes probar 'multiplicative' si la varianza aumenta con el tiempo)
-    # El periodo depende de tus datos (7 para semanal, 30 para mensual)
-    decomposition = seasonal_decompose(df_daily, model='additive', period=30)
+    # STATIONAL DESCOMPOSITION
+    # we use an additive model because we have seen that the variance is quite stable over time
+    decomposition = seasonal_decompose(df_daily, model='additive', period=30) #period 30 for month
     
     fig = decomposition.plot()
     fig.set_size_inches(12, 8)
-    fig.suptitle('Descomposición Estacional: Tendencia, Estacionalidad y Residuos', fontsize=16)
+    fig.suptitle('Seasonal Decomposition: Trend, Seasonality and Residuals', fontsize=16)
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     plt.show()
     
 
-    # --- 2. AUTOCORRELACIÓN (ACF y PACF) ---
-    # Vital para elegir los términos p y q de ARIMA
+    # AUTOCORRELATION ADF AND PACF
+    # Vital pfor selecting the terms p y q of ARIMA
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 5))
-    plot_acf(df_daily, ax=ax1, lags=30, title="Autocorrelación (ACF)")
-    plot_pacf(df_daily, ax=ax2, lags=30, title="Autocorrelación Parcial (PACF)")
+    plot_acf(df_daily, ax=ax1, lags=30, title="Autocorrelation (ACF)")
+    plot_pacf(df_daily, ax=ax2, lags=30, title="Partial Autocorrelation (PACF)")
     plt.show()
 
-    # --- 3. ANÁLISIS DE ESTACIONARIEDAD (Rolling Statistics) ---
+    # STATIONARITY ANALYSIS 
     rolmean = df_daily.rolling(window=7).mean()
     rolstd = df_daily.rolling(window=7).std()
 
     plt.figure(figsize=(12, 6))
     plt.plot(df_daily, color='blue', label='Original', alpha=0.3)
-    plt.plot(rolmean, color='red', label='Media Móvil (7d)')
-    plt.plot(rolstd, color='black', label='Desviación Típica Móvil (7d)')
+    plt.plot(rolmean, color='red', label='Rolling Mean (7d)')
+    plt.plot(rolstd, color='black', label='Rolling Std Dev (7d)')
     plt.legend(loc='best')
-    plt.title('Media y Desviación Estándar Móvil')
+    plt.title('Rolling Mean & Standard Deviation')
     plt.show()
 
-    # --- 4. IMPACTO DE VARIABLES EXÓGENAS (Boxplot Promociones) ---
+    #IMPACT OF EXOGENOUS VARIABLES (Promotions Boxplot) 
     plt.figure(figsize=(10, 6))
     sns.boxplot(data=df, x='Holiday/Promotion', y='Units Sold', palette='Set2')
-    plt.title('Impacto de Promociones en las Unidades Vendidas')
-    plt.xticks([0, 1], ['Sin Promo', 'Con Promo'])
+    plt.title('Impact of Promotions on Units Sold')
+    plt.xticks([0, 1], ['No Promo', 'With Promo'])
     plt.show()
        
 
