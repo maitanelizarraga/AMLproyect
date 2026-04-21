@@ -116,14 +116,6 @@ def eda(df):
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     plt.show()
     
-
-    # AUTOCORRELATION ADF AND PACF
-    # Vital pfor selecting the terms p y q of ARIMA
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 5))
-    plot_acf(df_daily, ax=ax1, lags=30, title="Autocorrelation (ACF)")
-    plot_pacf(df_daily, ax=ax2, lags=30, title="Partial Autocorrelation (PACF)")
-    plt.show()
-
     # STATIONARITY ANALYSIS 
     rolmean = df_daily.rolling(window=7).mean()
     rolstd = df_daily.rolling(window=7).std()
