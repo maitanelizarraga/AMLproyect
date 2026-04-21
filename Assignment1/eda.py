@@ -1,15 +1,15 @@
 # EXPLORATORY DATA ANALYSIS
 
-def importarcsv(): 
+def importcsv(): 
     import pandas as pd 
-    df = pd.read_csv("./Assignment1/Digital_Payment_Fraud_Detection_Dataset.csv") 
+    df = pd.read_csv("Digital_Payment_Fraud_Detection_Dataset.csv") 
     #we make sure that the dataset is correctly imported 
     #we can see the different columns names 
     print(df.iloc[0]) 
     return df
 
 def initialinspection(df): 
-    print("ANALYSIS:")
+    print("\n" + "ANALYSIS:")
     print("First row:" + "\n" + str(df.iloc[0])) 
     print(" ")
     print("Data types:" + "\n" + str(df.dtypes)) 

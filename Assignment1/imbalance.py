@@ -1,121 +1,34 @@
+import pandas as pd
+import numpy as np
+from imblearn.over_sampling import SMOTE
+from imblearn.under_sampling import RandomUnderSampler, TomekLinks
+from imblearn.ensemble import BalancedRandomForestClassifier
+from sklearn.metrics import classification_report, f1_score
+from lightgbm import LGBMClassifier
 
-
-def adjustingweights(df): 
-    #as we have seen, the dataset is imbalanced, so we will adjust the weights of the classes to balance them
-    from sklearn.utils import class_weight
-    import numpy as np
-    class_weights = class_weight.compute_class_weight('balanced', np.unique(df['is_fraud']), df['is_fraud'])
-    print("Class weights: ", class_weights)
-
-def automaticweights(df): 
-    #we can also use the automatic weights of the models, which will adjust the weights of the classes automatically
-    print("Automatic weights: ", "balanced")
-
-def comparison(df): 
-    #we can compare the results of the models with and without adjusting the weights, and with automatic weights, to see which one performs better
-    print("Comparison of models with different weight adjustments: ")
-    print("Model with adjusted weights: ")
-    adjustingweights(df)
-    print("Model with automatic weights: ")
-    automaticweights(df)
-
-def oversamplongsmote(df): 
-    #we can also use oversampling techniques, such as SMOTE, to balance the dataset
-    from imblearn.over_sampling import SMOTE
-    from sklearn.model_selection import train_test_split
-    
-    X = df.drop("is_fraud", axis=1)
-    y = df["is_fraud"]
-    
+def oversampling_smote_data(X_train, y_train):
+    # Solo aplicamos a columnas numéricas procesadas
+    X_train_num = X_train.select_dtypes(include=[np.number])
     smote = SMOTE(random_state=42)
-    X_resampled, y_resampled = smote.fit_resample(X, y)
-    
-    print("Original dataset shape: ", X.shape)
-    print("Resampled dataset shape: ", X_resampled.shape)
+    X_res, y_res = smote.fit_resample(X_train_num, y_train)
+    print(f"Post-SMOTE: Fraude={sum(y_res==1)}, No-Fraude={sum(y_res==0)}")
+    return X_res, y_res
 
-def oversamplingadasyn(df): 
-    #we can also use the ADASYN oversampling technique, which is similar to SMOTE but focuses on harder-to-learn examples
-    from imblearn.over_sampling import ADASYN
-    from sklearn.model_selection import train_test_split
+def evaluate_balanced_model(X_train, y_train, X_test, y_test):
+    # Evaluamos usando LightGBM que suele ser el mejor en fraude
+    X_test_num = X_test.select_dtypes(include=[np.number])
+    model = LGBMClassifier(n_estimators=100, random_state=42, verbose=-1)
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test_num)
     
-    X = df.drop("is_fraud", axis=1)
-    y = df["is_fraud"]
-    
-    adasyn = ADASYN(random_state=42)
-    X_resampled, y_resampled = adasyn.fit_resample(X, y)
-    
-    print("Original dataset shape: ", X.shape)
-    print("Resampled dataset shape: ", X_resampled.shape)
+    print("\nRESULTADOS MODELO BALANCEADO:")
+    print(classification_report(y_test, y_pred))
+    return f1_score(y_test, y_pred, average='weighted')
 
-
-def oversamplingrandom(df): 
-    #we can also use random oversampling, which simply duplicates examples from the minority class to balance the dataset
-    from imblearn.over_sampling import RandomOverSampler
-    from sklearn.model_selection import train_test_split
-    
-    X = df.drop("is_fraud", axis=1)
-    y = df["is_fraud"]
-    
-    ros = RandomOverSampler(random_state=42)
-    X_resampled, y_resampled = ros.fit_resample(X, y)
-    
-    print("Original dataset shape: ", X.shape)
-    print("Resampled dataset shape: ", X_resampled.shape)
-
-def undersamplingnearmiss(df): 
-    #we can also use the NearMiss undersampling technique, which selects examples from the majority class that are closest to the minority class examples
-    from imblearn.under_sampling import NearMiss
-    from sklearn.model_selection import train_test_split
-    
-    X = df.drop("is_fraud", axis=1)
-    y = df["is_fraud"]
-    
-    nearmiss = NearMiss()
-    X_resampled, y_resampled = nearmiss.fit_resample(X, y)
-    
-    print("Original dataset shape: ", X.shape)
-    print("Resampled dataset shape: ", X_resampled.shape)
-
-
-def undersamplingtomek(df):
-    #we can also use the Tomek Links undersampling technique, which removes examples from the majority class that are close to the minority class examples
-    from imblearn.under_sampling import TomekLinks
-    from sklearn.model_selection import train_test_split
-    
-    X = df.drop("is_fraud", axis=1)
-    y = df["is_fraud"]
-    
-    tomek = TomekLinks()
-    X_resampled, y_resampled = tomek.fit_resample(X, y)
-    
-    print("Original dataset shape: ", X.shape)
-    print("Resampled dataset shape: ", X_resampled.shape)
-
-
-
-def undersamplingrandom(df): 
-    #we can also use random undersampling, which simply removes examples from the majority class to balance the dataset
-    from imblearn.under_sampling import RandomUnderSampler
-    from sklearn.model_selection import train_test_split
-    
-    X = df.drop("is_fraud", axis=1)
-    y = df["is_fraud"]
-    
-    rus = RandomUnderSampler(random_state=42)
-    X_resampled, y_resampled = rus.fit_resample(X, y)
-    
-    print("Original dataset shape: ", X.shape)
-    print("Resampled dataset shape: ", X_resampled.shape)
-
-def balancedrandomforest(df): 
-    #we can also use the BalancedRandomForestClassifier, which is a random forest classifier that adjusts the weights of the classes automatically
-    from imblearn.ensemble import BalancedRandomForestClassifier
-    from sklearn.model_selection import train_test_split
-    
-    X = df.drop("is_fraud", axis=1)
-    y = df["is_fraud"]
-    
-    brf = BalancedRandomForestClassifier(random_state=42)
-    brf.fit(X, y)
-    
-    print("Balanced Random Forest Classifier fitted successfully")
+def balanced_rf_model(X_train, y_train, X_test, y_test):
+    X_train_num = X_train.select_dtypes(include=[np.number])
+    X_test_num = X_test.select_dtypes(include=[np.number])
+    brf = BalancedRandomForestClassifier(n_estimators=100, random_state=42)
+    brf.fit(X_train_num, y_train)
+    y_pred = brf.predict(X_test_num)
+    print("Balanced Random Forest F1-Score:", f1_score(y_test, y_pred, average='weighted'))

@@ -7,6 +7,7 @@ requires-python = ">=3.12"
 dependencies = [
     "imbalanced-learn>=0.14.1",
     "ipykernel>=7.2.0",
+    "lightgbm>=4.6.0",
     "matplotlib>=3.10.8",
     "optuna-dashboard>=0.20.0",
     "pandas>=3.0.0",
@@ -16,4 +17,5 @@ dependencies = [
     "torch>=2.10.0",
     "torchaudio>=2.10.0",
     "torchvision>=0.25.0",
+    "xgboost>=3.2.0",
 ]
