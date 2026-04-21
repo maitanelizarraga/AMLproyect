@@ -1,23 +1,30 @@
 from eda import importarcsv, datapartitioning, initialinspection, datacleaning, eda
+from induce_missingness import induce_missingness, run_diagnostics
 import baselinemodels
 
 def main():
-    # 1. Carga y Análisis exploratorio
+    # 1. Data loading, inspection, cleaning, and EDA
     df = importarcsv()
     initialinspection(df)
     df = datacleaning(df)
     
-    # Comenta la línea de abajo si no quieres ver los gráficos cada vez
-    # eda(df) 
+    # Commented out to save time during development, but you can re-enable it to see the EDA results.
+    # eda(df)
+
+    # 2. Induce missingness and run diagnostics
+    df = induce_missingness(df, seed=42)
+    run_diagnostics(df, df)  # optional: remove if you don't want the table every run
+
+    #TODO: DATA IMPUTATION
     
-    # 2. Partición de datos
+    # 3. Data partitioning
     X_train, X_test, y_train, y_test = datapartitioning(df)
     
     print("\n" + "=" * 60)
     print("EJECUTANDO MODELOS BASE")
     print("=" * 60)
     
-    # 3. Ejecución de modelos (baselinemodels.main ya hace el filtrado numérico)
+    # 4. Model training and evaluation
     best_model = baselinemodels.main(X_train, y_train, X_test, y_test)
     
     if best_model:
