@@ -2,7 +2,7 @@
 
 def importcsv(): 
     import pandas as pd 
-    df = pd.read_csv("Digital_Payment_Fraud_Detection_Dataset.csv") 
+    df = pd.read_csv("./Assignment1/datasets/Digital_Payment_Fraud_Detection_Dataset.csv") 
     #we make sure that the dataset is correctly imported 
     #we can see the different columns names 
     print(df.iloc[0]) 
@@ -158,32 +158,17 @@ def eda(df):
     plt.title('Distribution of Amounts: Legitimate (0) vs Fraudulent (1)')
     plt.show()
 
- 
-def datapartitioning(df):
-    import pandas as pd
-    import numpy as np
+def main():
+    # Import dataset
+    df = importcsv()
     
-    # Fix the seed for reproducibility
-    np.random.seed(42)
-    
-    # Separate features and target variable
-    X = df.drop("fraud_label", axis=1)
-    y = df["fraud_label"]
-    
-    # We create a random permutation of the indices of the dataset
-    indices = np.random.permutation(len(df))
-    
-    # We store the size of the test set (20% of the dataset)
-    test_size = int(len(df) * 0.2)
-    
-    # We separate the indices for the test and training sets
-    test_indices = indices[:test_size]
-    train_indices = indices[test_size:]
-    
-    # Create the training and test sets
-    X_train = X.iloc[train_indices]
-    X_test = X.iloc[test_indices]
-    y_train = y.iloc[train_indices]
-    y_test = y.iloc[test_indices]
-    
-    return X_train, X_test, y_train, y_test
+    # Fast view of the dataset
+    print(f"Dataset: {df.shape[0]} rows")
+
+    initialinspection(df)
+    datacleaning(df)
+    eda(df)
+
+
+if __name__ == "__main__": 
+    main()

@@ -119,14 +119,19 @@ def run_diagnostics(df_missing, df_original):
 
     return summary
 
-
-if __name__ == "__main__":
-    df = pd.read_csv("./Assignment1/Digital_Payment_Fraud_Detection_Dataset.csv")
+def main():
+    df = pd.read_csv("./Assignment1/datasets/Digital_Payment_Fraud_Detection_Dataset.csv")
     print(f"Original shape:  {df.shape}")
     print(f"Missing values:  {df.isnull().sum().sum()}\n")
 
     df_missing = induce_missingness(df, seed=42)
     run_diagnostics(df_missing, df)
 
-    # df_missing.to_csv("Digital_Payment_Fraud_Detection_Dataset_missing.csv", index=False)
-    # print("Saved to: Digital_Payment_Fraud_Detection_Dataset_missing.csv")
+    df_missing.to_csv("./Assignment1/datasets/Digital_Payment_Fraud_Detection_Dataset_missing.csv", index=False)
+    print("Saved to: datasets/Digital_Payment_Fraud_Detection_Dataset_missing.csv")
+
+
+if __name__ == "__main__": 
+    main()
+
+
