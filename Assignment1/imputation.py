@@ -2,6 +2,8 @@ from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 import pandas as pd
 
+#hay todavia missing values
+
 def imputation(df):
     df_temp = df.copy()
     
