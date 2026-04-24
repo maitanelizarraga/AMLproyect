@@ -88,15 +88,15 @@ def main():
     
     # Random Forest
     from sklearn.ensemble import RandomForestClassifier
-    results.append(evaluate_model(RandomForestClassifier(n_estimators=100, n_jobs=-1), X_train_n, y_train, X_val_n, y_val, "Random Forest"))
+    results.append(evaluate_model(RandomForestClassifier(n_estimators=1000, n_jobs=-1), X_train_n, y_train, X_val_n, y_val, "Random Forest"))
     
     # XGBoost
     from xgboost import XGBClassifier
-    results.append(evaluate_model(XGBClassifier(n_estimators=100, eval_metric='logloss'), X_train_n, y_train, X_val_n, y_val, "XGBoost"))
+    results.append(evaluate_model(XGBClassifier(n_estimators=1000, eval_metric='logloss'), X_train_n, y_train, X_val_n, y_val, "XGBoost"))
     
     # LightGBM
     from lightgbm import LGBMClassifier
-    results.append(evaluate_model(LGBMClassifier(n_estimators=100, verbose=-1), X_train_n, y_train, X_val_n, y_val, "LightGBM"))
+    results.append(evaluate_model(LGBMClassifier(n_estimators=1000, verbose=-1), X_train_n, y_train, X_val_n, y_val, "LightGBM"))
     
     # 3. Compare and select the best model
     best_model_meta = compare_models(results)
