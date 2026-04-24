@@ -4,6 +4,7 @@ from imblearn.over_sampling import SMOTE, ADASYN, BorderlineSMOTE
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.ensemble import BalancedRandomForestClassifier
 from sklearn.metrics import classification_report, f1_score
+from sklearn.utils import class_weight
 from lightgbm import LGBMClassifier
 
 def load_partitioned_data():
@@ -11,12 +12,12 @@ def load_partitioned_data():
     val = pd.read_csv("./Assignment1/datasets/val.csv")
     test = pd.read_csv("./Assignment1/datasets/test.csv")
     
-    # split x and y 
+    # Separamos X e y
     X_train, y_train = train.drop("fraud_label", axis=1), train["fraud_label"]
     X_val, y_val = val.drop("fraud_label", axis=1), val["fraud_label"]
     X_test, y_test = test.drop("fraud_label", axis=1), test["fraud_label"]
     
-    # filter only numeric
+    # Filtramos solo numéricos (necesario para ADASYN/SMOTE)
     X_train = X_train.select_dtypes(include=[np.number])
     X_val = X_val.select_dtypes(include=[np.number])
     X_test = X_test.select_dtypes(include=[np.number])
@@ -24,7 +25,6 @@ def load_partitioned_data():
     return X_train, y_train, X_val, y_val, X_test, y_test
 
 def evaluate_on_validation(X_train_res, y_train_res, X_val, y_val, method_name):
-    #trains with balanced data and evaluates on the original VALIDATION set.
     print(f"\n" + "="*40)
     print(f"MÉTODO: {method_name}")
     print(f"="*40)
@@ -38,44 +38,46 @@ def evaluate_on_validation(X_train_res, y_train_res, X_val, y_val, method_name):
 
 def main():
     X_train, y_train, X_val, y_val, X_test, y_test = load_partitioned_data()
-    
     results = {}
 
-    # TECHNIQUE 1: Class Weights  ---
-    from sklearn.utils import class_weight
+    # --- TÉCNICA 1: Class Weights ---
     weights = class_weight.compute_class_weight('balanced', classes=np.unique(y_train), y=y_train)
     cw_dict = dict(zip(np.unique(y_train), weights))
-    
     model_cw = LGBMClassifier(n_estimators=100, class_weight=cw_dict, random_state=42, verbose=-1)
     model_cw.fit(X_train, y_train)
     results['Class Weights'] = f1_score(y_val, model_cw.predict(X_val), average='weighted')
-    print("\nResultados Class Weights guardados.")
 
-    # --- TECHNIQUE 2: SMOTE ---
+    # --- TÉCNICA 2: SMOTE ---
     smote = SMOTE(random_state=42)
     X_smote, y_smote = smote.fit_resample(X_train, y_train)
     results['SMOTE'] = evaluate_on_validation(X_smote, y_smote, X_val, y_val, "SMOTE")
 
-    # --- TECHNIQUE 3: ADASYN ---
+    # --- TÉCNICA 3: ADASYN (Y GUARDADO DE DATOS) ---
     adasyn = ADASYN(random_state=42)
     X_ada, y_ada = adasyn.fit_resample(X_train, y_train)
     results['ADASYN'] = evaluate_on_validation(X_ada, y_ada, X_val, y_val, "ADASYN")
 
-    # --- TECHNIQUE 4: Random UnderSampling ---
+    #guardamos solo el adasyn porque es el que mejor ha funcionado, y ademas ha creado datos artificiales que ayudan a mejorar la precision del modelo
+    # RECONSTRUCCIÓN Y GUARDADO DEL DATASET ADASYN
+    # Combinamos X e y en un solo DataFrame
+    df_adasyn = pd.concat([pd.DataFrame(X_ada), pd.Series(y_ada, name='fraud_label')], axis=1)
+    output_path = "./Assignment1/datasets/train_balanced_adasyn.csv"
+    df_adasyn.to_csv(output_path, index=False)
+    print(f"\n[INFO] Dataset de entrenamiento balanceado con ADASYN guardado en: {output_path}")
+
+    # --- TÉCNICA 4: Random UnderSampling ---
     rus = RandomUnderSampler(random_state=42)
     X_rus, y_rus = rus.fit_resample(X_train, y_train)
     results['UnderSampling'] = evaluate_on_validation(X_rus, y_rus, X_val, y_val, "UnderSampling")
 
-    # --- TECHNIQUE 5: Balanced Random Forest ---
+    # --- TÉCNICA 5: Balanced Random Forest ---
     brf = BalancedRandomForestClassifier(n_estimators=100, random_state=42, sampling_strategy='all', replacement=True)
     brf.fit(X_train, y_train)
-    y_pred_brf = brf.predict(X_val)
-    results['Balanced RF'] = f1_score(y_val, y_pred_brf, average='weighted')
-    print("\nResultados Balanced RF guardados.")
+    results['Balanced RF'] = f1_score(y_val, brf.predict(X_val), average='weighted')
 
-    # --- FINAL COMPARATION ---
+    # --- COMPARACIÓN FINAL ---
     print("\n" + "!"*30)
-    print("SUMMARY DE F1-SCORE ")
+    print("RESUMEN DE F1-SCORE (VALIDACIÓN)")
     for method, score in sorted(results.items(), key=lambda x: x[1], reverse=True):
         print(f"{method:<20}: {score:.4f}")
 
