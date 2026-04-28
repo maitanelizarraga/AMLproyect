@@ -7,6 +7,7 @@ import data_partition
 import baselinemodels
 import imbalance
 import multi_class
+import final_evaluation
 
 def main():
     # First of all, we make a brief analysis to realize what we are working with
@@ -19,7 +20,7 @@ def main():
     
     # Thirdly, we imput the data of the missing values
     print("\n--- STEP 3: MULTIVARIATE IMPUTATION (MICE) ---")
-    imputation.main() # completamente hecho
+    imputation.main() #hecho, no quedan missings
 
     # 4. Data Partitioning
     print("\n--- STEP 4: DATA PARTITIONING ---")
@@ -39,6 +40,7 @@ def main():
 
     # Re-evaluate with the best performing model (e.g., LightGBM)
     #imbalance.evaluate_balanced_model(X_res, y_res, X_test, y_test)
+    final_evaluation.main()
 
 if __name__ == "__main__":
     main()

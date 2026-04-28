@@ -173,8 +173,8 @@ def run_diagnostics(df_missing, df_original):
     return summary
 
 def main():
-    input_path = "./Assignment1/datasets/Digital_Payment_Fraud_Detection_Dataset.csv"
-    output_path = "./Assignment1/datasets/Digital_Payment_Fraud_Detection_Dataset_missing.csv"
+    input_path = "./datasets/Digital_Payment_Fraud_Detection_Dataset.csv"
+    output_path = "./datasets/Digital_Payment_Fraud_Detection_Dataset_missing.csv"
     
     try:
         df = pd.read_csv(input_path)
