@@ -50,8 +50,7 @@ def entrenar_modelos(df_multi):
 
     # --- MODELO 2: LOGISTIC REGRESSION (MULTINOMIAL) ---
     # Multinomial usa la función Softmax para calcular probabilidades entre las 3 clases
-    softmax_logit = LogisticRegression(
-        multi_class='multinomial', 
+    softmax_logit = LogisticRegression( 
         solver='lbfgs', 
         max_iter=2000, 
         class_weight='balanced',
@@ -73,7 +72,7 @@ def entrenar_modelos(df_multi):
 
 def main():
     # Nota: Asegúrate de que la ruta sea correcta según tu carpeta de trabajo
-    input_path = "./Assignment1/datasets/train_balanced_adasyn.csv"
+    input_path = "./Assignment1/datasets/Digital_Payment_Fraud_Detection_Dataset_imputed.csv"
     output_path = "./Assignment1/datasets/Digital_Payment_Fraud_Detection_Dataset_multiclass.csv"
     
     try:

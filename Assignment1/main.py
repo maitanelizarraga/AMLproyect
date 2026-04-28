@@ -15,11 +15,11 @@ def main():
     
     # Secondly, we induce missing values in the dataset to simulate real-world scenarios and evaluate imputation techniques.
     print("\n--- STEP 2: INDUCING MISSING VALUES (MCAR/MAR) ---")
-    induce_missingness.main()
+    induce_missingness.main() #añadido MNAR
     
     # Thirdly, we imput the data of the missing values
     print("\n--- STEP 3: MULTIVARIATE IMPUTATION (MICE) ---")
-    imputation.main() #quedan missing
+    imputation.main() #hecho, no quedan missings
 
     #posible analisis eda
 
