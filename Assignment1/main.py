@@ -14,7 +14,7 @@ def main():
     #eda.main() #hecho
     
     # Secondly, we induce missing values in the dataset to simulate real-world scenarios and evaluate imputation techniques.
-    print("\n--- STEP 2: INDUCING MISSING VALUES (MCAR/MAR) ---")
+    print("\n--- STEP 2: INDUCING MISSING VALUES (MCAR/MAR/MNAR) ---")
     induce_missingness.main() #añadido MNAR
     
     # Thirdly, we imput the data of the missing values

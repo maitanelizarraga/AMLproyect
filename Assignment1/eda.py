@@ -29,7 +29,6 @@ def eda(df):
     import matplotlib.pyplot as plt 
     import seaborn as sns 
 
-
     # Fraud distribution
     ax = sns.countplot(x="fraud_label", data=df, color="#D2B48C")
     plt.title("Fraud distribution")
