@@ -27,7 +27,7 @@ def datapartitioning(df):
     return X_train, X_val, X_test, y_train, y_val, y_test
 
 def main():
-    df = pd.read_csv("./Assignment1/datasets/Digital_Payment_Fraud_Detection_Dataset_imputed.csv")
+    df = pd.read_csv("./datasets/Digital_Payment_Fraud_Detection_Dataset_imputed.csv")
 
     # Execute partitioning
     X_train, X_val, X_test, y_train, y_val, y_test = datapartitioning(df)
@@ -41,11 +41,11 @@ def main():
     print("----------------------------\n")
 
     # Save to CSV
-    pd.concat([X_train, y_train], axis=1).to_csv(f"./Assignment1/datasets/train.csv", index=False)
-    pd.concat([X_val, y_val], axis=1).to_csv(f"./Assignment1/datasets/val.csv", index=False)
-    pd.concat([X_test, y_test], axis=1).to_csv(f"./Assignment1/datasets/test.csv", index=False)
+    pd.concat([X_train, y_train], axis=1).to_csv(f"./datasets/train.csv", index=False)
+    pd.concat([X_val, y_val], axis=1).to_csv(f"./datasets/val.csv", index=False)
+    pd.concat([X_test, y_test], axis=1).to_csv(f"./datasets/test.csv", index=False)
     
-    print("Files saved in ./Assignment1/datasets/")
+    print("Files saved in ./datasets/")
 
 if __name__ == "__main__": 
     main()

@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
@@ -69,9 +68,9 @@ def compare_models(results):
     return results[0]
 
 def main():
-    train_df = pd.read_csv("./Assignment1/datasets/train.csv")
-    val_df = pd.read_csv("./Assignment1/datasets/val.csv")
-    test_df = pd.read_csv("./Assignment1/datasets/test.csv")
+    train_df = pd.read_csv("./datasets/train.csv")
+    val_df = pd.read_csv("./datasets/val.csv")
+    test_df = pd.read_csv("./datasets/test.csv")
     
     X_train, y_train = train_df.drop("fraud_label", axis=1), train_df["fraud_label"]
     X_val, y_val = val_df.drop("fraud_label", axis=1), val_df["fraud_label"]

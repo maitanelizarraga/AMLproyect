@@ -2,7 +2,7 @@
 
 def importcsv(): 
     import pandas as pd 
-    df = pd.read_csv("./Assignment1/datasets/Digital_Payment_Fraud_Detection_Dataset.csv") 
+    df = pd.read_csv("./datasets/Digital_Payment_Fraud_Detection_Dataset.csv") 
     #we make sure that the dataset is correctly imported 
     #we can see the different columns names 
     print(df.iloc[0]) 
