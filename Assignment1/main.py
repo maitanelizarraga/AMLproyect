@@ -20,7 +20,7 @@ def main():
     
     # Thirdly, we imput the data of the missing values
     print("\n--- STEP 3: MULTIVARIATE IMPUTATION (MICE) ---")
-    imputation.main() #hecho, no quedan missings
+    imputation.main() #completamente hecho
 
     # 4. Data Partitioning
     print("\n--- STEP 4: DATA PARTITIONING ---")
