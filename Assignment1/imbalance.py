@@ -12,16 +12,35 @@ def load_partitioned_data():
     val = pd.read_csv("./datasets/val.csv")
     test = pd.read_csv("./datasets/test.csv")
     
-    # Separate X and y
+    # Define columns
+    cat_cols = ['transaction_type', 'payment_mode', 'device_type']
+    num_cols = [
+        'account_age_days', 'previous_failed_attempts', 'is_international', 
+        'ip_risk_score', 'login_attempts_last_24h', 'transaction_amount', 
+        'transaction_hour', 'avg_transaction_amount'
+    ] 
+    # 1. Seplit X and y
     X_train, y_train = train.drop("fraud_label", axis=1), train["fraud_label"]
     X_val, y_val = val.drop("fraud_label", axis=1), val["fraud_label"]
     X_test, y_test = test.drop("fraud_label", axis=1), test["fraud_label"]
-    
-    # Filter only numeric (necessary for ADASYN/SMOTE)
-    X_train = X_train.select_dtypes(include=[np.number])
-    X_val = X_val.select_dtypes(include=[np.number])
-    X_test = X_test.select_dtypes(include=[np.number])
-    
+
+    # 2. One-Hot Encoding (OHE)
+    X_train = pd.get_dummies(X_train[cat_cols + num_cols], columns=cat_cols, dtype=int)
+    X_val = pd.get_dummies(X_val[cat_cols + num_cols], columns=cat_cols, dtype=int)
+    X_test = pd.get_dummies(X_test[cat_cols + num_cols], columns=cat_cols, dtype=int)
+
+    # 3. Align columns
+    X_train, X_val = X_train.align(X_val, join='left', axis=1, fill_value=0)
+    X_train, X_test = X_train.align(X_test, join='left', axis=1, fill_value=0)
+
+    # 4. Scale
+    for col in X_train.columns:
+        mx, mn = X_train[col].max(), X_train[col].min()
+        if mx > mn:
+            X_train[col] = (X_train[col] - mn) / (mx - mn)
+            X_val[col] = (X_val[col] - mn) / (mx - mn)
+            X_test[col] = (X_test[col] - mn) / (mx - mn)
+
     return X_train, y_train, X_val, y_val, X_test, y_test
 
 def evaluate_on_validation(X_train_res, y_train_res, X_val, y_val, method_name):
@@ -35,6 +54,38 @@ def evaluate_on_validation(X_train_res, y_train_res, X_val, y_val, method_name):
     
     print(classification_report(y_val, y_pred))
     return f1_score(y_val, y_pred, average='weighted')
+
+def run_final_test(best_method_name, X_train, y_train, X_test, y_test, X_smote=None, y_smote=None, X_ada=None, y_ada=None, X_rus=None, y_rus=None, cw_dict=None):
+    """
+    Recibe el nombre del ganador y todos los posibles datasets para ejecutar el test final.
+    """
+    # 1. Internal mapping: we associate each name with its data
+    data_mapping = {
+        'SMOTE': (X_smote, y_smote),
+        'ADASYN': (X_ada, y_ada),
+        'UnderSampling': (X_rus, y_rus),
+        'Class Weights': (X_train, y_train),
+        'Balanced RF': (X_train, y_train)
+    }
+
+    # 2. Data selection
+    X_f, y_f = data_mapping[best_method_name]
+    
+    print(f"\n" + "*"*60)
+    print(f" RUNNING FINAL TEST WITH: {best_method_name}")
+    print("*"*60)
+
+    # 3. Setup and training
+    model = LGBMClassifier(n_estimators=100, random_state=42, verbose=-1)
+    
+    if best_method_name == 'Class Weights' and cw_dict:
+        model.set_params(class_weight=cw_dict)
+
+    model.fit(X_f, y_f)
+    
+    # 4. Prediction and Reporting
+    y_pred = model.predict(X_test)
+    print(classification_report(y_test, y_pred))
 
 def main():
     X_train, y_train, X_val, y_val, X_test, y_test = load_partitioned_data()
@@ -80,6 +131,11 @@ def main():
     print("F1-SCORE SUMMARY (VALIDATION)")
     for method, score in sorted(results.items(), key=lambda x: x[1], reverse=True):
         print(f"{method:<20}: {score:.4f}")
+
+    # Take the best model
+    best_method_name = sorted(results.items(), key=lambda x: x[1], reverse=True)[0][0]
+    run_final_test(best_method_name, X_train, y_train, X_test, y_test,X_smote=X_smote, y_smote=y_smote, X_ada=X_ada, y_ada=y_ada, X_rus=X_rus, y_rus=y_rus, cw_dict=cw_dict)
+   
 
 if __name__ == "__main__":
     main()

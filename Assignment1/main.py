@@ -12,31 +12,31 @@ import final_evaluation
 def main():
     # First of all, we make a brief analysis to realize what we are working with
     print("--- STEP 1: DATA LOADING ---")
-    #eda.main() # comletamente hecho
+    #eda.main() 
     
     # Secondly, we induce missing values in the dataset to simulate real-world scenarios and evaluate imputation techniques.
     print("\n--- STEP 2: INDUCING MISSING VALUES (MCAR/MAR/MNAR) ---")
-    induce_missingness.main() #completamente hecho
+    induce_missingness.main()
     
     # Thirdly, we imput the data of the missing values
     print("\n--- STEP 3: MULTIVARIATE IMPUTATION (MICE) ---")
-    imputation.main() #completamente hecho
+    imputation.main()
 
     # 4. Data Partitioning
     print("\n--- STEP 4: DATA PARTITIONING ---")
-    data_partition.main() #completamente hecho 
+    data_partition.main() 
     
     # 5. Baseline Model Execution
     print("\n--- STEP 5: BASELINE MODEL EVALUATION ---")
-    baselinemodels.main() #hecho
+    baselinemodels.main() 
     
     # 6. Imbalance Treatment
     print("\n--- STEP 6: IMBALANCE TREATMENT ---")
-    imbalance.main() #revisar bien
+    imbalance.main()
     
     #7. Multi-class Target Creation
     print("\n--- STEP 7: MULTI-CLASS TARGET CREATION ---")
-    multi_class.main() #continuar haciendo
+    multi_class.main() 
 
     # Re-evaluate with the best performing model (e.g., LightGBM)
     #imbalance.evaluate_balanced_model(X_res, y_res, X_test, y_test)

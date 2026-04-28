@@ -1,36 +1,39 @@
 import pandas as pd
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
-def numerical_features(X_train, X_val, X_test):
-    #Selects and scales numerical variables using Min-Max based on X_train.
-    cols_to_use = [
+def process_all_features(X_train, X_val, X_test):
+    # 1. Identify columns
+    cat_cols = ['transaction_type', 'payment_mode', 'device_type']
+    num_cols = [
         'account_age_days', 'previous_failed_attempts', 'is_international', 
         'ip_risk_score', 'login_attempts_last_24h', 'transaction_amount', 
         'transaction_hour', 'avg_transaction_amount'
     ]
+ 
+    # 2. Aply One-Hot Encoding
+    X_train_final = pd.get_dummies(X_train[cat_cols + num_cols], columns=cat_cols, dtype=int)
+    X_val_final = pd.get_dummies(X_val[cat_cols + num_cols], columns=cat_cols, dtype=int)
+    X_test_final = pd.get_dummies(X_test[cat_cols + num_cols], columns=cat_cols, dtype=int)
     
-    # Filter columns
-    X_train_num = X_train[cols_to_use].copy()
-    X_val_num = X_val[cols_to_use].copy()
-    X_test_num = X_test[cols_to_use].copy()
-    
-    print("\nScaling numerical variables...")
-    cols_to_scale = [
-        'account_age_days', 'previous_failed_attempts', 'ip_risk_score', 
-        'login_attempts_last_24h', 'transaction_amount', 'avg_transaction_amount'
-    ]
-    
-    for col in cols_to_scale:
-        min_val = X_train_num[col].min()
-        max_val = X_train_num[col].max()
-        
+    # Ensure that everyone has the same columns (in case any category does not appear in val/test)
+    X_train_final, X_val_final = X_train_final.align(X_val_final, join='left', axis=1, fill_value=0)
+    X_train_final, X_test_final = X_train_final.align(X_test_final, join='left', axis=1, fill_value=0)
+
+    # We converted everything to float to avoid any further type problems
+    X_train_final = X_train_final.astype(float)
+    X_val_final = X_val_final.astype(float)
+    X_test_final = X_test_final.astype(float)
+
+    # 3. Scale all variables
+    for col in X_train_final.columns:
+        min_val = X_train_final[col].min()
+        max_val = X_train_final[col].max()
         if max_val > min_val:
-            # Apply transformation from Train set to all three sets
-            X_train_num[col] = (X_train_num[col] - min_val) / (max_val - min_val)
-            X_val_num[col] = (X_val_num[col] - min_val) / (max_val - min_val)
-            X_test_num[col] = (X_test_num[col] - min_val) / (max_val - min_val)
-    
-    return X_train_num, X_val_num, X_test_num
+            X_train_final[col] = (X_train_final[col] - min_val) / (max_val - min_val)
+            X_val_final[col] = (X_val_final[col] - min_val) / (max_val - min_val)
+            X_test_final[col] = (X_test_final[col] - min_val) / (max_val - min_val)
+            
+    return X_train_final, X_val_final, X_test_final
 
 def evaluate_model(model, X_train, y_train, X_val, y_val, model_name):
     #Trains on the Train set and evaluates on Validation to compare models.
@@ -77,7 +80,7 @@ def main():
     X_test, y_test = test_df.drop("fraud_label", axis=1), test_df["fraud_label"]
     
     # 2. Process variables
-    X_train_n, X_val_n, X_test_n = numerical_features(X_train, X_val, X_test)
+    X_train_n, X_val_n, X_test_n = process_all_features(X_train, X_val, X_test)
     
     results = []
     
@@ -98,8 +101,24 @@ def main():
     results.append(evaluate_model(LGBMClassifier(n_estimators=1000, verbose=-1), X_train_n, y_train, X_val_n, y_val, "LightGBM"))
     
     # 3. Compare and select the best model
-    best_model_meta = compare_models(results)
-    print(f"\nThe best model is: {best_model_meta['model']}")
+    best_model = compare_models(results)
+    print(f"\nThe best model is: {best_model['model']}")
+    
+    # 4. FINAL evaluation with the TEST set
+    print("\n" + "!" * 60)
+    print("FINAL EVALUATION ON TEST SET (UNSEEN DATA)")
+    print("!" * 60)
+
+    if best_model == "Logistic Regression":
+        final_model = LogisticRegression(max_iter=1000)
+    elif best_model == "Random Forest":
+        final_model = RandomForestClassifier(n_estimators=1000, n_jobs=-1)
+    elif best_model == "XGBoost":
+        final_model = XGBClassifier(n_estimators=1000,eval_metric='logloss')
+    else:
+        final_model = LGBMClassifier(n_estimators=1000, verbose=-1)
+
+    evaluate_model(final_model, X_train_n, y_train, X_test_n, y_test, f"Final test:{best_model['model']}")
 
 if __name__ == "__main__":
     main()
