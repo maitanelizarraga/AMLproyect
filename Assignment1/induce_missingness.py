@@ -123,12 +123,12 @@ def run_diagnostics(df_missing, df_original):
         overall = df_missing[col].isnull().mean() * 100 # We calculate the percentage of nulls
         
         #Mean of the variable with and without missings.
-        """if pd.api.types.is_numeric_dtype(df_original[col]): #We look if the column is numeric
-            mean_orig = df_original[col].mean()
-            mean_miss = df_missing[col].mean()
+        if pd.api.types.is_numeric_dtype(df_original[col]): #We look if the column is numeric
+            mean_orig = round(df_original[col].mean(),2)
+            mean_miss = round(df_missing[col].mean(),2)
         else:
-            mean_orig = "N/A"
-            mean_miss = "N/A" """
+            mean_orig = "N/A (String)"
+            mean_miss = "N/A(String)" 
 
         #We calculate the null rate for each type of fraud
         by_class = df_missing.groupby("fraud_label")[col].apply(lambda s: s.isnull().mean() * 100)
@@ -156,19 +156,19 @@ def run_diagnostics(df_missing, df_original):
             "missing%_fraud=1": round(fraud_1, 2),
             "class_delta":      round(delta, 2),
             "warning":          "HIGH BIAS" if delta > 5 else "OK",
-           # "Original mean":    round(mean_orig,2),
-            #"Missings mean":    round(mean_miss,2)
+            "Original mean":    mean_orig,
+            "Missings mean":    mean_miss
         })
 
     summary = pd.DataFrame(rows).set_index("column")
 
     print("\n" + "=" * 80)
-    print("DIAGNÓSTICO AVANZADO DE VALORES FALTANTES (MCAR, MAR, MNAR)")
+    print("ADVANCED DIAGNOSIS OF MISSING VALUES (MCAR, MAR, MNAR)")
     print("=" * 80)
     print(summary.to_string())
     print("=" * 80)
-    print(f"Total de nulos generados: {df_missing.isnull().sum().sum()}")
-    print("Nota: Un class_delta alto indica que el modelo tendrá dificultades para aprender de esa clase.\n")
+    print(f"Total number of nulls generated: {df_missing.isnull().sum().sum()}")
+    print("Note: A high class_delta indicates that the model will have difficulty learning from that class.\n")
 
     return summary
 
@@ -178,20 +178,20 @@ def main():
     
     try:
         df = pd.read_csv(input_path)
-        print(f"Dataset original cargado: {df.shape}")
+        print(f"Original dataset loaded: {df.shape}")
 
-        # Aplicamos la inducción con los 3 mecanismos
+        # We applied induction with the 3 mechanisms
         df_missing = induce_missingness(df, seed=42)
         
-        # Ejecutamos el diagnóstico mejorado
+        # We execute the diagnostics
         run_diagnostics(df_missing, df)
 
-        # Guardamos
+        # Save the csv
         df_missing.to_csv(output_path, index=False)
-        print(f"Dataset con nulos guardado en: {output_path}")
+        print(f"Dataset with nulls saved in: {output_path}")
 
     except Exception as e:
-        print(f"Error en el proceso: {e}")
+        print(f"Error in the process: {e}")
 
 if __name__ == "__main__": 
     main()
