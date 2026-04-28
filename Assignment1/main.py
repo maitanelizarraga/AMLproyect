@@ -11,21 +11,19 @@ import multi_class
 def main():
     # First of all, we make a brief analysis to realize what we are working with
     print("--- STEP 1: DATA LOADING ---")
-    #eda.main() #hecho
+    #eda.main() # comletamente hecho
     
     # Secondly, we induce missing values in the dataset to simulate real-world scenarios and evaluate imputation techniques.
     print("\n--- STEP 2: INDUCING MISSING VALUES (MCAR/MAR/MNAR) ---")
-    induce_missingness.main() #añadido MNAR
+    induce_missingness.main() #completamente hecho
     
     # Thirdly, we imput the data of the missing values
     print("\n--- STEP 3: MULTIVARIATE IMPUTATION (MICE) ---")
-    imputation.main() #hecho, no quedan missings
-
-    #posible analisis eda
+    imputation.main() # completamente hecho
 
     # 4. Data Partitioning
     print("\n--- STEP 4: DATA PARTITIONING ---")
-    data_partition.main() #hecho 
+    data_partition.main() #completamente hecho 
     
     # 5. Baseline Model Execution
     print("\n--- STEP 5: BASELINE MODEL EVALUATION ---")

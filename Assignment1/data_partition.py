@@ -15,7 +15,7 @@ def datapartitioning(df):
         random_state=42, 
         stratify=y
     )
-    
+       
     # 3. Second split: The remaining 30% is split 50/50 (0.5 of 0.3 = 0.15 each)
     X_val, X_test, y_val, y_test = train_test_split(
         X_temp, y_temp, 
