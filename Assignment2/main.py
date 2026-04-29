@@ -3,6 +3,7 @@ import eda
 import adv_stat_models
 import analysis_grouped
 import data_agrupation
+import baseline_models
 
 
 def main():
