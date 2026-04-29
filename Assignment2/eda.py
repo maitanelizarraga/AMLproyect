@@ -6,7 +6,7 @@ from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 
 def importarcsv(): 
-    df = pd.read_csv("retail_store_inventory.csv") 
+    df = pd.read_csv("./datasets/retail_store_inventory.csv")
     #we make sure that the dataset is correctly imported 
     #we can see the different columns names 
     print(df.iloc[0]) 
@@ -30,9 +30,16 @@ def datacleaning(df):
     df['Date'] = pd.to_datetime(df['Date'])
     print("Data types:" + "\n" + str(df.dtypes)) 
     print(" ")
+
+    #GUARDAR EL DATASET LIMPIO
+    output_path = "./datasets/retail_store_inventory_cleaned.csv"
+    
+    df.to_csv(output_path, index=False)
+    print(f"Dataset saved into: {output_path}")
+    print(" ")
+
     #There are not missing values so more cleaning is not needed
     return df
-
 
 def eda(df): 
 
@@ -116,14 +123,6 @@ def eda(df):
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     plt.show()
     
-
-    # AUTOCORRELATION ADF AND PACF
-    # Vital pfor selecting the terms p y q of ARIMA
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 5))
-    plot_acf(df_daily, ax=ax1, lags=30, title="Autocorrelation (ACF)")
-    plot_pacf(df_daily, ax=ax2, lags=30, title="Partial Autocorrelation (PACF)")
-    plt.show()
-
     # STATIONARITY ANALYSIS 
     rolmean = df_daily.rolling(window=7).mean()
     rolstd = df_daily.rolling(window=7).std()
@@ -142,29 +141,13 @@ def eda(df):
     plt.title('Impact of Promotions on Units Sold')
     plt.xticks([0, 1], ['No Promo', 'With Promo'])
     plt.show()
-       
+     
+def main():
+    # Import dataset
+    df = importarcsv()
+    initialinspection(df)
+    datacleaning(df)
+    eda(df)
 
-def datapartitioning(df):
-    
-    # we make sure that the data is recogniced as time and we sort it by date, as its crucial for time series analysis
-    df = df.sort_values('Date').reset_index(drop=True)
-    
-
-    X = df.drop("Units Sold", axis=1)
-    y = df["Units Sold"]
-    
-    
-    # we calculate the split index for 80% training and 20% testing as it can not be randomly split due to the temporal nature of the data
-    test_size = int(len(df) * 0.2)
-    split_index = len(df) - test_size
-    
-    # separation of the data taking into account the temporal order
-    X_train = X.iloc[:split_index]
-    X_test = X.iloc[split_index:]
-    y_train = y.iloc[:split_index]
-    y_test = y.iloc[split_index:]
-    
-    print(f"Training from {df['Date'].iloc[0]} to {df['Date'].iloc[split_index-1]}")
-    print(f"Testing from {df['Date'].iloc[split_index]} to {df['Date'].iloc[-1]}")
-    
-    return X_train, X_test, y_train, y_test
+if __name__ == "__main__": 
+    main()

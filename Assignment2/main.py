@@ -1,17 +1,31 @@
-from eda import importarcsv, datapartitioning, initialinspection, datacleaning, eda
+import data_partition
+import eda
+import baseline_models
+import analysis_grouped
+import data_agrupation
+
 
 def main():
-    df = importarcsv()
-    initialinspection(df)
-    df = datacleaning(df)
-    eda(df)
-    X_train, X_test, y_train, y_test = datapartitioning(df)
+    # 1. Limpieza inicial
+    eda.main() 
     
-    print("\n" + "=" * 60)
-    print("BASELINE MODELS")
-    print("=" * 60)
+    # 2. Agrupación (Nuevo paso separado)
+    print("\n--- STEP 2: DATA AGRUPATION ---")
+    data_agrupation.main()
     
-    results = []
+    # 3. Particionamiento
+    print("\n--- STEP 3: DATA PARTITIONING ---")
+    data_partition.main() 
+    
+    # 4.Analysis Grouped
+    print("\n--- STEP 4: ANALYSIS GROUPED ---")
+    analysis_grouped.main()
+
+    # 5. Baseline Models
+    print("\n--- STEP 5: BASELINE MODELS ---")
+    baseline_models.main() 
+
+
 
     print("\n" + "=" * 60)
     print("PROCESS COMPLETED")
