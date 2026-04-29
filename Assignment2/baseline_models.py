@@ -1,83 +1,103 @@
 import pandas as pd
-from statsmodels.tsa.statespace.sarimax import SARIMAX
-from sklearn.metrics import mean_absolute_error
+import numpy as np
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+from statsmodels.tsa.holtwinters import ExponentialSmoothing
+from statsmodels.tsa.arima.model import ARIMA
 import warnings
 
-# Suppress convergence warnings for cleaner output
+# Suppress warnings for cleaner output
 warnings.filterwarnings("ignore")
 
-def run_sarima(train, val, target_col):
-    """Pure SARIMA model (Baseline): Captures daily and weekly seasonality."""
-    model = SARIMAX(train[target_col], 
-                    order=(1, 1, 1), 
-                    seasonal_order=(1, 1, 1, 7))
-    results = model.fit(disp=False)
-    return results.get_forecast(steps=len(val)).predicted_mean
+def calculate_metrics(y_true, y_pred):
+    """Calculates standard error metrics."""
+    mae = mean_absolute_error(y_true, y_pred)
+    rmse = np.sqrt(mean_squared_error(y_true, y_pred))
+    return mae, rmse
 
-def run_sarimax(train, val, target_col, exog_cols):
-    """SARIMAX model (Evolved): Uses external variables like Price and Discount."""
-    model = SARIMAX(train[target_col], 
-                    exog=train[exog_cols],
-                    order=(1, 1, 1), 
-                    seasonal_order=(1, 1, 1, 7))
-    results = model.fit(disp=False)
-    return results.get_forecast(steps=len(val), exog=val[exog_cols]).predicted_mean
-
-def run_random_walk(train, val, target_col):
-    """Random Walk Forecast (Naive Baseline): Forecasts the last observed value."""
-    last_value = train[target_col].iloc[-1]
+def run_naive(train, val):
+    """Naïve Forecasting: Predicts the last observed value."""
+    last_value = train.iloc[-1]
     return [last_value] * len(val)
 
+def run_moving_average(train, val, window=7):
+    """Moving Average (MA): Approach basic features using a sliding window."""
+    history = list(train.values)
+    predictions = []
+    for i in range(len(val)):
+        avg = np.mean(history[-window:])
+        predictions.append(avg)
+        history.append(avg) # Dynamic update
+    return predictions
+
+def run_holt_winters(train, val):
+    """Exponential Smoothing (Holt-Winters): Handles trend and seasonality."""
+    # We use additive seasonality as seen in EDA (period 7 for weekly)
+    model = ExponentialSmoothing(train, trend='add', seasonal='add', seasonal_periods=7).fit()
+    return model.forecast(len(val))
+
+def run_arima(train, val):
+    """ARIMA Model: Identifies if the series requires differencing."""
+    # Baseline (1,1,1) to check stationarity and autocorrelation
+    model = ARIMA(train, order=(1, 1, 1)).fit()
+    return model.forecast(len(val))
+
 def main():
-    # 1. Load the pre-partitioned data (already aggregated by store and date)
+    # 1. Load pre-partitioned and aggregated data
     train_full = pd.read_csv("./datasets/train.csv", parse_dates=['Date'], index_col='Date')
     val_full = pd.read_csv("./datasets/val.csv", parse_dates=['Date'], index_col='Date')
 
     target = 'Units Sold'
-    exog_vars = ['Price', 'Discount', 'Competitor Pricing', 'Inventory Level']
-    
     stores = train_full['Store ID'].unique()
-    performance_report = []
+    all_results = []
 
-    print(f"Running models for {len(stores)} stores...\n")
+    print(f"Initializing Time-Series Analysis for {len(stores)} stores...\n")
 
     for store_id in stores:
-        print(f"Processing Store {store_id}...")
-        # Filter store-specific data
-        train_store = train_full[train_full['Store ID'] == store_id]
-        val_store = val_full[val_full['Store ID'] == store_id]
+        # Filter data for specific store
+        train_s = train_full[train_full['Store ID'] == store_id][target]
+        val_s = val_full[val_full['Store ID'] == store_id][target]
+        region = train_full[train_full['Store ID'] == store_id]['Region'].iloc[0]
 
-        try:
-            # 2. Execute all models
-            p_rw = run_random_walk(train_store, val_store, target)
-            p_sarima = run_sarima(train_store, val_store, target)
-            p_sarimax = run_sarimax(train_store, val_store, target, exog_vars)
+        # Ensure we have enough data for seasonal models
+        if len(train_s) < 14:
+            continue
 
-            # 3. Calculate metrics (MAE)
-            mae_rw = mean_absolute_error(val_store[target], p_rw)
-            mae_sarima = mean_absolute_error(val_store[target], p_sarima)
-            mae_sarimax = mean_absolute_error(val_store[target], p_sarimax)
+        # Execute models according to the required complexity
+        models = {
+            "Naive": run_naive(train_s, val_s),
+            "Moving Average": run_moving_average(train_s, val_s),
+            "Holt-Winters": run_holt_winters(train_s, val_s),
+            "ARIMA": run_arima(train_s, val_s)
+        }
 
-            performance_report.append({
-                'Store': store_id,
-                'RW_MAE': mae_rw,
-                'SARIMA_MAE': mae_sarima,
-                'SARIMAX_MAE': mae_sarimax
+        # Evaluate performance
+        for name, preds in models.items():
+            mae, rmse = calculate_metrics(val_s, preds)
+            all_results.append({
+                "Region": region,
+                "Store ID": store_id,
+                "Model": name,
+                "MAE": mae,
+                "RMSE": rmse
             })
-        except Exception as e:
-            print(f"Skipping store {store_id} due to error: {e}")
 
-    # 4. Generate Final Report
-    report_df = pd.DataFrame(performance_report)
-    print("\n" + "="*55)
-    print("FINAL PERFORMANCE REPORT (MAE COMPARISON)")
-    print("="*55)
-    # Reordering columns to show evolution: RW -> SARIMA -> SARIMAX
-    cols = ['Store', 'RW_MAE', 'SARIMA_MAE', 'SARIMAX_MAE']
-    print(report_df[cols].to_string(index=False))
+    # 2. Final Comparative Report
+    results_df = pd.DataFrame(all_results)
     
-    print("\nGlobal Averages:")
-    print(report_df[cols].mean(numeric_only=True).round(2))
+    # Global average comparison
+    print("--- GLOBAL MODEL PERFORMANCE (AVG) ---")
+    summary = results_df.groupby("Model")[["MAE", "RMSE"]].mean().sort_values("MAE")
+    print(summary)
+
+    # Regional analysis (as requested: predicting sales by region and store)
+    print("\n--- PERFORMANCE BY REGION ---")
+    regional_summary = results_df.groupby(["Region", "Model"])[["MAE"]].mean().unstack()
+    print(regional_summary)
+
+    # Identifying the best method for each store
+    print("\n--- BEST MODEL IDENTIFIED PER STORE ---")
+    best_models = results_df.loc[results_df.groupby("Store ID")["MAE"].idxmin()]
+    print(best_models[["Region", "Store ID", "Model", "MAE"]])
 
 if __name__ == "__main__": 
     main()

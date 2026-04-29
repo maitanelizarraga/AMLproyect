@@ -1,6 +1,6 @@
 import data_partition
 import eda
-import baseline_models
+import adv_stat_models
 import analysis_grouped
 import data_agrupation
 
@@ -23,7 +23,11 @@ def main():
 
     # 5. Baseline Models
     print("\n--- STEP 5: BASELINE MODELS ---")
-    baseline_models.main() 
+    baseline_models.main()
+
+    # 6. Advanced Statistical Models (SARIMA & SARIMAX)
+    print("\n--- STEP 6: ADVANCED STATISTICAL MODELS ---")
+    adv_stat_models.main() 
 
 
 
