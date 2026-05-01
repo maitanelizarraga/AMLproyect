@@ -7,14 +7,14 @@ import baseline_models
 
 
 def main():
-    # 1. Limpieza inicial
+    # 1.Eda and data preparation
     eda.main() 
     
-    # 2. Agrupación (Nuevo paso separado)
+    # 2.Data agrupation
     print("\n--- STEP 2: DATA AGRUPATION ---")
     data_agrupation.main()
     
-    # 3. Particionamiento
+    # 3.Data partitioning
     print("\n--- STEP 3: DATA PARTITIONING ---")
     data_partition.main() 
     

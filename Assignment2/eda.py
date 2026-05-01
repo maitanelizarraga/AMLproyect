@@ -3,7 +3,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from statsmodels.tsa.seasonal import seasonal_decompose
-from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 
 def importarcsv(): 
     df = pd.read_csv("./datasets/retail_store_inventory.csv")
@@ -31,7 +30,41 @@ def datacleaning(df):
     print("Data types:" + "\n" + str(df.dtypes)) 
     print(" ")
 
-    #GUARDAR EL DATASET LIMPIO
+    #The dataset is made randmomly, so we have to correct some inconsitences
+     # 1.Fixed region per store (Global store mode)
+    df['Region'] = df.groupby('Store ID')['Region'].transform(lambda x: x.mode()[0])
+    # We assign manually to one store the region norht, not to loss it
+    df.loc[df['Store ID'] == 'S005', 'Region'] = 'North'
+
+    #2.Consisten category by product
+    df['Category'] = df.groupby('Product ID')['Category'].transform(lambda x: x.mode()[0])
+
+    # 3. Consistent weather by day and store (Daily fashion by mode)
+    df['Weather Condition'] = df.groupby(['Date', 'Store ID'])['Weather Condition'].transform(lambda x: x.mode()[0])
+    
+
+    # 4. Consistent seasonality by date
+    import numpy as np
+
+    #We create conditions based on month and day
+    m = df['Date'].dt.month
+    d = df['Date'].dt.day
+
+    conditions = [
+    # Spring: March 21 to June 20
+    ((m == 3) & (d >= 21)) | (m.isin([4, 5])) | ((m == 6) & (d < 21)),
+    
+    # Summer: June 21 to September 20
+    ((m == 6) & (d >= 21)) | (m.isin([7, 8])) | ((m == 9) & (d < 21)),
+    
+    # Autumn: September 21 to December 20
+    ((m == 9) & (d >= 21)) | (m.isin([10, 11])) | ((m == 12) & (d < 21))
+    ]
+    values = ['Spring', 'Summer', 'Autumn']
+    # We assign the stations; anything not meeting the above conditions will be 'Winter'.
+    df['Seasonality'] = np.select(conditions, values, default='Winter')
+
+    #SAVE THE CLEAN DATASET
     output_path = "./datasets/retail_store_inventory_cleaned.csv"
     
     df.to_csv(output_path, index=False)
