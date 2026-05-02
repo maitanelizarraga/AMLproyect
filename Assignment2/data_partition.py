@@ -146,17 +146,21 @@ def main():
     print("--- PARTITION SUMMARY STORES ---")
     print(f"Train: {len(train_store)} | Val: {len(val_store)} | Test: {len(test_store)}")
     print("Final datasets saved: train_Store.csv, val_Store.csv, test_Store.csv")
+    print("\n") 
 
     print("--- PARTITION SUMMARY REGIONS ---")
     print(f"Train: {len(train_region)} | Val: {len(val_region)} | Test: {len(test_region)}")
     print("Final datasets saved: train_region.csv, val_region.csv, test_region.csv")
+    print("\n") 
 
     print("--- PARTITION SUMMARY CATEGORYS ---")
     print(f"Train: {len(train_region)} | Val: {len(val_region)} | Test: {len(test_region)}")
     print("Final datasets saved: train_category.csv, val_category.csv, test_category.csv")
+    print("\n") 
 
     print("--- PARTITION SUMMARY PRODUCTS---")
     print(f"Train: {len(train_product)} | Val: {len(val_product)} | Test: {len(test_product)}")
+    print("\n") 
     print("Final datasets saved: train_product.csv, val_product.csv, test_product.csv")
 
 if __name__ == "__main__":

@@ -76,8 +76,8 @@ def main():
     print("CHRONOS — GLOBAL AVERAGES (product level)")
     print("=" * 45)
     print(report[["MAE", "RMSE"]].mean().round(2))
-    report.to_csv("./datasets/chronos_results.csv", index=False)
-    print("\nFull results saved to datasets/chronos_results.csv")
+    report.to_csv("./results/chronos_results.csv", index=False)
+    print("\nFull results saved to ./results/chronos_results.csv")
 
     #  COMPARISON WITH LSTM
     # This comparison is the key deliverable of section 4.3: does a zero-shot

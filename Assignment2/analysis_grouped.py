@@ -60,7 +60,7 @@ def run_extended_eda():
     plt.show()
 
 def main():
-    print("--- GENERATING INSIGHTS FROM DATA GROUPED ---")
+    print("Insights from grouped data:")
     run_extended_eda()
 
 if __name__ == "__main__":

@@ -57,7 +57,7 @@ def main():
     stores = train_full['Store ID'].unique()
     all_results = []
 
-    print(f"--- STARTING BASELINE MODEL EVALUATION ({len(stores)} Stores) ---")
+    print(f"Baseline Model Evaluation ({len(stores)} Stores) ---")
 
     for store_id in stores:
         # Filter store-specific data
@@ -91,7 +91,11 @@ def main():
     # 2. GENERATE COMPARATIVE REPORTS
     results_df = pd.DataFrame(all_results)
     
-    # Global average performance
+    # NUEVO: Guardar resultados a CSV (igual que lts_model.py)
+    results_df.to_csv("./results/baseline_results.csv", index=False)
+    print("\nFull results saved to ./results/baseline_results.csv")
+
+    # Global average performance (se mantiene el print por consola)
     print("\n" + "="*40)
     print("GLOBAL MODEL PERFORMANCE (AVG)")
     print("="*40)

@@ -12,6 +12,7 @@ def importarcsv():
     return df
 
 def initialinspection(df): 
+    print("\n") 
     print("ANALYSIS:")
     print("First row:" + "\n" + str(df.iloc[0])) 
     print(" ")
@@ -88,7 +89,8 @@ def eda(df):
 
     plt.tight_layout()
     plt.show()
-    print("/n")
+    
+    print("\n") 
 
     print("VISUALIZATION OF THE DATA")
     # CORRELATION MATRIX 

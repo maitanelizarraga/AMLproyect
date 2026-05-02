@@ -158,8 +158,8 @@ def main():
     print("LSTM — GLOBAL AVERAGES (product level)")
     print("=" * 45)
     print(report[["MAE", "RMSE"]].mean().round(2))
-    report.to_csv("./datasets/lstm_results.csv", index=False)
-    print("\nFull results saved to datasets/lstm_results.csv")
+    report.to_csv("./results/lstm_results.csv", index=False)
+    print("\nFull results saved to ./results/lstm_results.csv")
 
 
 if __name__ == "__main__":

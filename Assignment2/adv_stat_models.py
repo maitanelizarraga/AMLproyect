@@ -69,6 +69,10 @@ def main():
 
     # 4. Generate Final Report
     report_df = pd.DataFrame(performance_report)
+    
+    report_df.to_csv("./results/adv_stat_results.csv", index=False)
+    print("\nFull results saved to ./results/adv_stat_results.csv")
+
     print("\n" + "="*55)
     print("FINAL PERFORMANCE REPORT (MAE COMPARISON)")
     print("="*55)
