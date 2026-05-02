@@ -4,10 +4,12 @@ import adv_stat_models
 import analysis_grouped
 import data_agrupation
 import baseline_models
+import dl_foundations_models
 
 
 def main():
     # 1.Eda and data preparation
+    print("\n--- STEP 1: EDA AND DATA PREPARATION ---")
     eda.main() 
     
     # 2.Data agrupation
@@ -29,6 +31,20 @@ def main():
     # 6. Advanced Statistical Models (SARIMA & SARIMAX)
     print("\n--- STEP 6: ADVANCED STATISTICAL MODELS ---")
     adv_stat_models.main() 
+
+    # 7. Deep Learning & Foundation Models
+    print("\n--- STEP 7: DEEP LEARNING & FOUNDATION MODELS ---")
+    dl_foundations_models.main()
+
+
+    # 7. LSTM
+    print("\n--- STEP 7: LSTM ---")
+    lstm_model.main()
+
+    # 8. Chronos (zero-shot)
+    print("\n--- STEP 8: CHRONOS (zero-shot) ---")
+    chronos_model.main()
+
 
 
 

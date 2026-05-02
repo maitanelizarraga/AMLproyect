@@ -30,8 +30,8 @@ def run_random_walk(train, val, target_col):
 
 def main():
     # 1. Load the pre-partitioned data (already aggregated by store and date)
-    train_full = pd.read_csv("./datasets/train.csv", parse_dates=['Date'], index_col='Date')
-    val_full = pd.read_csv("./datasets/val.csv", parse_dates=['Date'], index_col='Date')
+    train_full = pd.read_csv("./datasets/train_Store.csv", parse_dates=['Date'], index_col='Date')
+    val_full = pd.read_csv("./datasets/val_Store.csv", parse_dates=['Date'], index_col='Date')
 
     target = 'Units Sold'
     exog_vars = ['Price', 'Discount', 'Competitor Pricing', 'Inventory Level']

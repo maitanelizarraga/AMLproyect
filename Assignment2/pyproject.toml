@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "chronos-forecasting[torch]>=2.2.2",
     "matplotlib>=3.10.8",
     "optuna-dashboard>=0.20.0",
     "pandas>=3.0.2",
