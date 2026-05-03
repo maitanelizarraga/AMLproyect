@@ -11,35 +11,30 @@ import pandas as pd
 from tabulate import tabulate
 
 def imprimir_tabla_desde_archivos():
-    try:
-        # Cargar los resultados guardados por cada script
-        df_base = pd.read_csv("./results/baseline_results.csv")
-        df_adv  = pd.read_csv("./results/adv_stat_results.csv")
-        df_lstm = pd.read_csv("./results/lstm_results.csv")
-        df_chro = pd.read_csv("./results/chronos_results.csv")
+    df_base = pd.read_csv("./results/baseline_results.csv")
+    df_adv  = pd.read_csv("./results/adv_stat_results.csv")
+    df_lstm = pd.read_csv("./results/lstm_results.csv")
+    df_chro = pd.read_csv("./results/chronos_results.csv")
 
-        # Consolidar promedios globales para la tabla final
-        resumen = [
-            {"Modelo": "Naive", "MAE": df_base[df_base['Model'] == 'Naive']['MAE'].mean()},
-            {"Modelo": "Holt-Winters", "MAE": df_base[df_base['Model'] == 'Holt-Winters']['MAE'].mean()},
-            {"Modelo": "SARIMA", "MAE": df_adv['SARIMA_MAE'].mean()},
-            {"Modelo": "SARIMAX", "MAE": df_adv['SARIMAX_MAE'].mean()},
-            {"Modelo": "LSTM", "MAE": df_lstm['MAE'].mean()},
-            {"Modelo": "Chronos", "MAE": df_chro['MAE'].mean()}
-        ]
+    # Mean of values for each models
+    summ = [
+        {"Model": "Naive", "MAE": df_base[df_base['Model'] == 'Naive']['MAE'].mean()},
+        {"Model": "Holt-Winters", "MAE": df_base[df_base['Model'] == 'Holt-Winters']['MAE'].mean()},
+        {"Model": "SARIMA", "MAE": df_adv['SARIMA_MAE'].mean()},
+        {"Model": "SARIMAX", "MAE": df_adv['SARIMAX_MAE'].mean()},
+        {"Model": "LSTM", "MAE": df_lstm['MAE'].mean()},
+        {"Model": "Chronos", "MAE": df_chro['MAE'].mean()}
+    ]
 
-        df_final = pd.DataFrame(resumen).sort_values("MAE")
+    df_final = pd.DataFrame(summ).sort_values("MAE")
 
-        print("\n" + "="*50)
-        print("TABLA COMPARATIVA FINAL (DESDE ARCHIVOS CSV)")
-        print("="*50)
-        print(tabulate(df_final, headers='keys', tablefmt='psql', showindex=False))
-        
-        print(f"\nEL MEJOR MODELO ES: {df_final.iloc[0]['Modelo']}")
-        print("="*50)
-
-    except FileNotFoundError as e:
-        print(f"Error: No se encontró el archivo {e.filename}. Ejecuta primero todos los modelos.")
+    print("\n" + "="*50)
+    print("FINAL COMPARISON OF MODELS")
+    print("="*50)
+    print(tabulate(df_final, headers='keys', tablefmt='psql', showindex=False))
+    
+    print(f"\nTHE BEST MODEL IS: {df_final.iloc[0]['Model']}")
+    print("="*50)
 
 
 def main():
@@ -75,6 +70,7 @@ def main():
     print("\n--- STEP 8: CHRONOS (zero-shot) ---")
     chronos_model.main()
 
+    # 9. Final comparative table
     print("\n--- STEP 9: FINAL COMPARATIVE TABLE ---")
     imprimir_tabla_desde_archivos()
 
