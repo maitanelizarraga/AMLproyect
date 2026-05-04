@@ -9,113 +9,116 @@ import warnings
 warnings.filterwarnings("ignore")
 
 def calculate_metrics(y_true, y_pred):
-    #Calculates standard error metrics (MAE and RMSE)
     mae = mean_absolute_error(y_true, y_pred)
     rmse = np.sqrt(mean_squared_error(y_true, y_pred))
     return mae, rmse
 
-def run_naive(train, val):
-    #Naive Forecasting: Predicts using the last observed value
+# --- BASELINE MODELS ---
+def run_naive(train, horizon):
     last_value = train.iloc[-1]
-    return [last_value] * len(val)
+    return [last_value] * horizon
 
-def run_moving_average(train, val, window=7):
-    #Moving Average (MA): Uses a sliding window to forecast
+def run_moving_average(train, horizon, window=7):
     history = list(train.values)
     predictions = []
-    for _ in range(len(val)):
+    for _ in range(horizon):
         avg = np.mean(history[-window:])
         predictions.append(avg)
-        history.append(avg)  # Dynamic update for multi-step forecast
+        history.append(avg)
     return predictions
 
-def run_holt_winters(train, val):
-    #Holt-Winters: Exponential smoothing considering trend and weekly seasonality
+def run_holt_winters(train, horizon):
     try:
-        # period=7 because the data is aggregated daily and shows weekly patterns
         model = ExponentialSmoothing(train, trend='add', seasonal='add', seasonal_periods=7).fit()
-        return model.forecast(len(val))
+        return model.forecast(horizon)
     except:
-        # Fallback to Naive if model fails to converge
-        return run_naive(train, val)
+        return run_naive(train, horizon)
 
-def run_arima(train, val):
-    #ARIMA Model: Basic (1,1,1) configuration for time-series baseline.
+def run_arima(train, horizon):
     try:
         model = ARIMA(train, order=(1, 1, 1)).fit()
-        return model.forecast(len(val))
+        return model.forecast(horizon)
     except:
-        return run_naive(train, val)
+        return run_naive(train, horizon)
+
+def evaluate_models(train_data, target_data, group_name, group_id):
+    """Encapsulates the evaluation logic for a single group (Store or Region)."""
+    horizon = len(target_data)
+    if len(train_data) < 14: # Requirement for seasonal models
+        return []
+
+    models = {
+        "Naive": run_naive(train_data, horizon),
+        "Moving Average": run_moving_average(train_data, horizon),
+        "Holt-Winters": run_holt_winters(train_data, horizon),
+        "ARIMA": run_arima(train_data, horizon)
+    }
+
+    results = []
+    for name, preds in models.items():
+        mae, rmse = calculate_metrics(target_data, preds)
+        results.append({
+            "Type": group_name,
+            "ID": group_id,
+            "Model": name,
+            "MAE": mae,
+            "RMSE": rmse
+        })
+    return results
 
 def main():
+    # 1. LOAD DATASETS
+    # Note: Using Validation set as our target for baseline comparison
+    path = "./datasets"
+    
+    # Store Data
+    train_store = pd.read_csv(f"{path}/train_Store.csv", parse_dates=['Date'], index_col='Date')
+    test_store = pd.read_csv(f"{path}/test_Store.csv", parse_dates=['Date'], index_col='Date')
+    
+    # Region Data
+    train_region = pd.read_csv(f"{path}/train_region.csv", parse_dates=['Date'], index_col='Date')
+    test_region = pd.read_csv(f"{path}/test_region.csv", parse_dates=['Date'], index_col='Date')
 
-    train_full = pd.read_csv("./datasets/train_Store.csv", parse_dates=['Date'], index_col='Date')
-    val_full = pd.read_csv("./datasets/val_Store.csv", parse_dates=['Date'], index_col='Date')
-
-
-    target = 'Units Sold'
-    stores = train_full['Store ID'].unique()
     all_results = []
+    target_col = 'Units Sold'
 
-    print(f"Baseline Model Evaluation ({len(stores)} Stores) ---")
+    # 2. EVALUATE PER STORE
+    print("Evaluating Stores...")
+    stores = train_store['Store ID'].unique()
+    for s_id in stores:
+        t_s = train_store[train_store['Store ID'] == s_id][target_col]
+        v_s = test_store[test_store['Store ID'] == s_id][target_col]
+        if not v_s.empty:
+            all_results.extend(evaluate_models(t_s, v_s, "Store", s_id))
 
-    for store_id in stores:
-        # Filter store-specific data
-        train_s = train_full[train_full['Store ID'] == store_id][target]
-        val_s = val_full[val_full['Store ID'] == store_id][target]
-        region = train_full[train_full['Store ID'] == store_id]['Region'].iloc[0]
+    # 3. EVALUATE PER REGION
+    print("Evaluating Regions...")
+    regions = train_region['Region'].unique()
+    for r_id in regions:
+        t_r = train_region[train_region['Region'] == r_id][target_col]
+        v_r = test_region[test_region['Region'] == r_id][target_col]
+        if not v_r.empty:
+            all_results.extend(evaluate_models(t_r, v_r, "Region", r_id))
 
-        # Minimum data requirement for seasonal models (at least 2 full weeks)
-        if len(train_s) < 14:
-            continue
-
-        # Execute Baseline Models
-        models = {
-            "Naive": run_naive(train_s, val_s),
-            "Moving Average": run_moving_average(train_s, val_s),
-            "Holt-Winters": run_holt_winters(train_s, val_s),
-            "ARIMA": run_arima(train_s, val_s)
-        }
-
-        # Calculate metrics for each model
-        for name, preds in models.items():
-            mae, rmse = calculate_metrics(val_s, preds)
-            all_results.append({
-                "Region": region,
-                "Store ID": store_id,
-                "Model": name,
-                "MAE": mae,
-                "RMSE": rmse
-            })
-
-    # 2. GENERATE COMPARATIVE REPORTS
+    # 4. REPORTS
     results_df = pd.DataFrame(all_results)
     
-    # NUEVO: Guardar resultados a CSV (igual que lts_model.py)
+    
     results_df.to_csv("./results/baseline_results.csv", index=False)
-    print("\nFull results saved to ./results/baseline_results.csv")
+    print(f"\nResults saved to ./results/baseline_results.csv")
 
-    # Global average performance (se mantiene el print por consola)
+    # --- PERFORMANCE SUMMARY ---
     print("\n" + "="*40)
-    print("GLOBAL MODEL PERFORMANCE (AVG)")
+    print("GLOBAL MODEL PERFORMANCE (AVG MAE)")
     print("="*40)
-    summary = results_df.groupby("Model")[["MAE", "RMSE"]].mean().sort_values("MAE")
-    print(summary)
+    print(results_df.groupby(["Type", "Model"])["MAE"].mean().unstack())
 
-    # Regional analysis
+    # --- BEST MODELS ---
     print("\n" + "="*40)
-    print("PERFORMANCE BY REGION (MAE)")
+    print("BEST MODEL PER CATEGORY")
     print("="*40)
-    regional_summary = results_df.groupby(["Region", "Model"])[["MAE"]].mean().unstack()
-    print(regional_summary)
+    best_models = results_df.loc[results_df.groupby(["Type", "ID"])["MAE"].idxmin()]
+    print(best_models[["Type", "ID", "Model", "MAE"]].head(10)) # Showing first 10 for brevity
 
-    # Best model per store identification
-    print("\n" + "="*40)
-    print("BEST MODEL PER STORE")
-    print("="*40)
-    best_idx = results_df.groupby("Store ID")["MAE"].idxmin()
-    best_models = results_df.loc[best_idx].sort_values("Region")
-    print(best_models[["Region", "Store ID", "Model", "MAE"]].to_string(index=False))
-
-if __name__ == "__main__": 
+if __name__ == "__main__":
     main()

@@ -135,7 +135,7 @@ def train_and_eval(train_vals, val_vals):
 
 def main():
     train_df = pd.read_csv("./datasets/train_product.csv", parse_dates=["Date"], index_col="Date")
-    val_df   = pd.read_csv("./datasets/val_product.csv",   parse_dates=["Date"], index_col="Date")
+    test_df   = pd.read_csv("./datasets/test_product.csv",   parse_dates=["Date"], index_col="Date")
 
     products = train_df["Product ID"].unique()
     results  = []
@@ -144,9 +144,9 @@ def main():
 
     for pid in products:
         train_s = train_df[train_df["Product ID"] == pid]["Units Sold"].values
-        val_s   = val_df[val_df["Product ID"]     == pid]["Units Sold"].values
+        test_s   = test_df[test_df["Product ID"]     == pid]["Units Sold"].values
 
-        mae, rmse = train_and_eval(train_s, val_s)
+        mae, rmse = train_and_eval(train_s, test_s)
         if mae is None:
             continue
 

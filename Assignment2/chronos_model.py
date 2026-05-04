@@ -45,7 +45,7 @@ def forecast_product(pipeline, train_vals: np.ndarray, horizon: int) -> np.ndarr
 
 def main():
     train_df = pd.read_csv("./datasets/train_product.csv", parse_dates=["Date"], index_col="Date")
-    val_df   = pd.read_csv("./datasets/val_product.csv",   parse_dates=["Date"], index_col="Date")
+    test_df   = pd.read_csv("./datasets/test_product.csv",   parse_dates=["Date"], index_col="Date")
 
     print("Loading Chronos-T5-Tiny (zero-shot, no training needed)...\n")
     pipeline = load_chronos()
@@ -57,15 +57,15 @@ def main():
 
     for pid in products:
         train_s = train_df[train_df["Product ID"] == pid]["Units Sold"].values
-        val_s   = val_df[val_df["Product ID"]     == pid]["Units Sold"].values
+        test_s   = test_df[test_df["Product ID"]     == pid]["Units Sold"].values
 
-        if len(train_s) == 0 or len(val_s) == 0:
+        if len(train_s) == 0 or len(test_s) == 0:
             continue
 
         try:
-            preds = forecast_product(pipeline, train_s, horizon=len(val_s))
-            mae   = mean_absolute_error(val_s, preds)
-            rmse  = np.sqrt(mean_squared_error(val_s, preds))
+            preds = forecast_product(pipeline, train_s, horizon=len(test_s))
+            mae   = mean_absolute_error(test_s, preds)
+            rmse  = np.sqrt(mean_squared_error(test_s, preds))
             results.append({"Product ID": pid, "MAE": round(mae, 2), "RMSE": round(rmse, 2)})
             print(f"  {pid} → MAE={mae:.2f}  RMSE={rmse:.2f}")
         except Exception as e:
