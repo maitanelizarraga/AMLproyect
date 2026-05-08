@@ -12,7 +12,7 @@ import final_evaluation
 def main():
     # First of all, we make a brief analysis to realize what we are working with
     print("--- STEP 1: DATA LOADING ---")
-    #eda.main() 
+    eda.main() 
     
     # Secondly, we induce missing values in the dataset to simulate real-world scenarios and evaluate imputation techniques.
     print("\n--- STEP 2: INDUCING MISSING VALUES (MCAR/MAR/MNAR) ---")
