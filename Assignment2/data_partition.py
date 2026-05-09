@@ -64,8 +64,6 @@ def partition_by_category(df):
 
     return pd.concat(train_list), pd.concat(test_list)
 
-    return pd.concat(train_list), pd.concat(test_list)
-
 def partition_by_product(df):
     """
     Splits the already grouped data into train and test sets

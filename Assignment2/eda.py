@@ -142,6 +142,32 @@ def eda(df):
     plt.xticks(rotation=45)
     plt.show()
 
+    # --- WEEKLY INTENSITY BY REGION ---
+    # Grouping by Region provides clearer geographic patterns than individual stores
+    df['DayOfWeek'] = df['Date'].dt.day_name()
+    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    
+    pivot_region = df.pivot_table(index='DayOfWeek', columns='Region', 
+                                  values='Units Sold', aggfunc='mean').reindex(days)
+
+    plt.figure(figsize=(10, 6))
+    sns.heatmap(pivot_region, annot=True, cmap="YlGnBu", fmt=".1f", cbar_kws={'label': 'Avg Units Sold'})
+    plt.title('Average Sales: Region vs. Day of the Week', fontsize=14)
+    plt.tight_layout()
+    plt.show()
+
+     # --- CLIMATE-SENSITIVE CATEGORY ANALYSIS ---
+    # This plot crosses 'Weather Condition' cleaning results with sales data
+    plt.figure(figsize=(12, 6))
+    weather_impact = df.groupby(['Category', 'Weather Condition'])['Units Sold'].mean().unstack()
+    
+    sns.heatmap(weather_impact, annot=True, cmap="YlOrRd", fmt=".1f")
+    plt.title('Impact of Weather on Sales by Category', fontsize=14)
+    plt.ylabel('Category')
+    plt.xlabel('Weather Condition')
+    plt.tight_layout()
+    plt.show()
+
 
 ###############Time Plots ####################
 

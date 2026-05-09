@@ -1,7 +1,6 @@
 import data_partition
 import eda
 import adv_stat_models
-import analysis_grouped
 import data_agrupation
 import baseline_models
 import lts_model
@@ -50,27 +49,23 @@ def main():
     print("\n--- STEP 3: DATA PARTITIONING ---")
     data_partition.main() 
     
-    # 4.Analysis Grouped
-    print("\n--- STEP 4: ANALYSIS GROUPED ---")
-    analysis_grouped.main()
-
-    # 5. Baseline Models
+    # 4. Baseline Models
     print("\n--- STEP 5: BASELINE MODELS ---")
     baseline_models.main()
 
-    # 6. Advanced Statistical Models (SARIMA & SARIMAX)
+    # 5. Advanced Statistical Models (SARIMA & SARIMAX)
     print("\n--- STEP 6: ADVANCED STATISTICAL MODELS ---")
     adv_stat_models.main() 
 
-    # 7. LSTM
+    # 6. LSTM
     print("\n--- STEP 7: LSTM ---")
     lts_model.main()
 
-    # 8. Chronos (zero-shot)
+    # 7. Chronos (zero-shot)
     print("\n--- STEP 8: CHRONOS (zero-shot) ---")
     chronos_model.main()
 
-    # 9. Final comparative table
+    # 8. Final comparative table
     print("\n--- STEP 9: FINAL COMPARATIVE TABLE ---")
     imprimir_tabla_desde_archivos()
 
