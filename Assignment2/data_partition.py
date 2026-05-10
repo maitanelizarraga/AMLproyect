@@ -1,5 +1,16 @@
 import pandas as pd
 import os
+import random
+import numpy as np
+import torch
+
+def set_seed(seed=42):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+
 
 def partition_by_store(df):
     """
@@ -87,6 +98,7 @@ def partition_by_product(df):
 
 
 def main():
+    set_seed(42)
     # We load the data
     input_path_store = "./datasets/retail_store_grouped_by_store.csv"
     input_path_region = "./datasets/retail_store_grouped_by_region.csv"
@@ -141,15 +153,15 @@ def main():
     print("Final datasets saved: train_region.csv, test_region.csv")
     print("\n") 
 
-    print("--- PARTITION SUMMARY CATEGORYS ---")
+    print("--- PARTITION SUMMARY CATEGORIES ---")
     print(f"Train: {len(train_category)} | Test: {len(test_category)}")
     print("Final datasets saved: train_category.csv, test_category.csv")
     print("\n") 
 
     print("--- PARTITION SUMMARY PRODUCTS---")
     print(f"Train: {len(train_product)} | Test: {len(test_product)}")
-    print("\n") 
     print("Final datasets saved: train_product.csv, test_product.csv")
+    print("\n") 
 
 if __name__ == "__main__":
     main()

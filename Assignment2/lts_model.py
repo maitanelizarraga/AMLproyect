@@ -7,6 +7,15 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 import warnings
 warnings.filterwarnings("ignore")
+import random
+
+
+def set_seed(seed=42):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
 
 #  HYPERPARAMETERS 
 SEQ_LEN = 14   # how many past days the LSTM uses to predict
@@ -134,6 +143,7 @@ def train_and_eval(train_vals, val_vals):
 
 
 def main():
+    set_seed(42)
     train_df = pd.read_csv("./datasets/train_product.csv", parse_dates=["Date"], index_col="Date")
     test_df   = pd.read_csv("./datasets/test_product.csv",   parse_dates=["Date"], index_col="Date")
 

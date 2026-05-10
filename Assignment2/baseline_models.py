@@ -6,6 +6,18 @@ from statsmodels.tsa.arima.model import ARIMA
 import warnings
 import pmdarima as pm
 warnings.filterwarnings("ignore")
+import random
+import numpy as np
+import torch
+
+def set_seed(seed=42):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+
+
 
 def calculate_metrics(y_true, y_pred):
     mae = mean_absolute_error(y_true, y_pred)
@@ -40,13 +52,14 @@ def run_arima(train, horizon):
     try:
         # Seachs automatically the best combination
         model = pm.auto_arima(train, 
-                              seasonal=True, # Stationallity search active
-                              m=7,           # Weekly
-                              stepwise=True, 
-                              suppress_warnings=True, 
-                              error_action="ignore", 
-                              max_p=3, max_q=3, 
-                              trace=False) 
+                      seasonal=True,
+                      m=7,
+                      stepwise=True, 
+                      suppress_warnings=True,
+                      max_p=3, max_q=3, 
+                      error_action='ignore',
+                      trace=False,
+                      n_jobs=1)
         forecast = model.predict(n_periods=horizon)
         return forecast
     except Exception as e:
@@ -79,6 +92,7 @@ def evaluate_models(train_data, target_data, group_name, group_id):
     return results
 
 def main():
+    set_seed(42)
     # 1. LOAD DATASETS
     path = "./datasets"
     
@@ -120,7 +134,7 @@ def main():
             all_results.extend(evaluate_models(t_r, v_r, "Region", r_id))
 
      # 4. EVALUATE PER CATEGORY
-    print("Evaluating Categorys...")
+    print("Evaluating Categories...")
     categorys = train_category['Category'].unique()
     for c_id in categorys:
         t_c = train_category[train_category['Category'] == c_id][target_col]
@@ -135,7 +149,7 @@ def main():
         t_p = train_product[train_product['Product ID'] == p_id][target_col]
         v_p = test_product[test_product['Product ID'] == p_id][target_col]
         if not v_p.empty:
-            all_results.extend(evaluate_models(t_p, v_p, "Product ID", p_id))
+            all_results.extend(evaluate_models(t_p, v_p, "Product", p_id))
 
     # 6. REPORTS
     results_df = pd.DataFrame(all_results)
@@ -149,17 +163,26 @@ def main():
     print("GLOBAL MODEL PERFORMANCE (AVG MAE)")
     print("="*40)
     print(results_df.groupby(["Type", "Model"])["MAE"].mean().unstack().round(2))
+    print("\n" + "="*40)
     print("GLOBAL MODEL PERFORMANCE (AVG RMSE)")
+    print("="*40)
     print(results_df.groupby(["Type", "Model"])["RMSE"].mean().unstack().round(2))
+    print("\n" + "="*40)
     print("GLOBAL MODEL PERFORMANCE (AVG MAPE)")
+    print("="*40)
     print(results_df.groupby(["Type", "Model"])["MAPE"].mean().unstack().round(2))
 
     # --- BEST MODELS ---
     print("\n" + "="*40)
-    print("BEST MODEL PER CATEGORY")
+    print("BEST MODEL PER ENTITY TYPE")
     print("="*40)
-    best_models = results_df.loc[results_df.groupby(["Type", "ID"])["MAE"].idxmin()]
-    print(best_models[["Type", "ID", "Model", "MAE"]].head(10)) # Showing first 10 for brevity
+
+    for entity_type in ['Store', 'Region', 'Category', 'Product']:
+        subset = results_df[results_df['Type'] == entity_type]
+        if not subset.empty:
+            best = subset.loc[subset.groupby("ID")["MAE"].idxmin()]
+            print(f"\n--- {entity_type.upper()} ---")
+            print(best[["ID", "Model", "MAE"]].to_string(index=False))
 
 if __name__ == "__main__":
     main()

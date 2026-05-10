@@ -2,6 +2,18 @@ import pandas as pd
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from sklearn.metrics import mean_absolute_error
 import warnings
+import random
+import numpy as np
+import torch
+
+
+def set_seed(seed=42):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+
 
 # Suppress convergence warnings for cleaner output
 warnings.filterwarnings("ignore")
@@ -29,6 +41,7 @@ def run_random_walk(train, test, target_col):
     return [last_value] * len(test)
 
 def main():
+    set_seed(42)
     # 1. Load the pre-partitioned data (already aggregated by store and date)
     train_full = pd.read_csv("./datasets/train_Store.csv", parse_dates=['Date'], index_col='Date')
     test_full = pd.read_csv("./datasets/test_Store.csv", parse_dates=['Date'], index_col='Date')

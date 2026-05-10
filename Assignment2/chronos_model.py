@@ -4,6 +4,15 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 import torch
 import warnings
 warnings.filterwarnings("ignore")
+import random
+
+
+def set_seed(seed=42):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
 
 def load_chronos():
     """
@@ -17,7 +26,7 @@ def load_chronos():
     pipeline = ChronosPipeline.from_pretrained(
         "amazon/chronos-t5-tiny",
         device_map="cpu",
-        torch_dtype=torch.float32,
+        dtype=torch.float32,
     )
     return pipeline
 
@@ -44,6 +53,7 @@ def forecast_product(pipeline, train_vals: np.ndarray, horizon: int) -> np.ndarr
 
 
 def main():
+    set_seed(42)
     train_df = pd.read_csv("./datasets/train_product.csv", parse_dates=["Date"], index_col="Date")
     test_df   = pd.read_csv("./datasets/test_product.csv",   parse_dates=["Date"], index_col="Date")
 
@@ -83,7 +93,7 @@ def main():
     # This comparison is the key deliverable of section 4.3: does a zero-shot
     # foundation model beat a small LSTM trained specifically on our data?
     try:
-        lstm_report = pd.read_csv("./datasets/lstm_results.csv")
+        lstm_report = pd.read_csv("./results/lstm_results.csv")
         print("\n" + "=" * 45)
         print("FINAL COMPARISON: LSTM vs CHRONOS")
         print("=" * 45)
